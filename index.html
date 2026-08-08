@@ -1,12 +1,893 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>我是谁 · Self Archaeology</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>我是谁?</title>
+<style>
+:root{
+  --paper:#FFFFFF; --mist:#FAF8F5; --line:#E9E5DE; --ink:#17161A;
+  --graphite:#6E6A66; --dust:#B4AEA4; --sage:#7C8F73; --indigo:#35415E; --coral:#B4544A;
+  --serif:"Songti SC","Noto Serif SC","Source Han Serif SC","Songti TC",Georgia,"Times New Roman",serif;
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  transition:background .3s ease,color .3s ease}
+body.dark{background:var(--ink);color:var(--paper)}
+.wrap{max-width:672px;margin:0 auto;padding:40px 24px 80px}
+@media(min-width:640px){.wrap{padding:56px 32px 80px}}
+
+.topbar{display:flex;justify-content:flex-end;margin-bottom:16px}
+.lang{background:none;border:0;cursor:pointer;font-size:11px;letter-spacing:.18em;color:var(--dust);padding:4px 8px;font-family:var(--sans)}
+body.dark .lang{color:rgba(255,255,255,.45)}
+
+h1{font-family:var(--serif);font-size:26px;line-height:1.25;letter-spacing:.06em;margin:0;cursor:default;user-select:none}
+@media(min-width:640px){h1{font-size:30px}}
+.sub{margin:8px 0 0;font-size:13px;line-height:1.7;color:var(--graphite)}
+
+.replybox{margin-bottom:32px}
+.reply{border-left:2px solid var(--sage);padding:4px 0 4px 16px}
+.reply.crisis{border-left-color:var(--indigo)}
+.reply p{font-family:var(--serif);font-size:15px;line-height:1.9;margin:0}
+.reply .note{margin-top:12px;font-size:12px;line-height:1.7;color:var(--graphite);font-family:var(--sans)}
+.card{margin-top:24px;background:var(--mist);border-radius:12px;padding:20px}
+.card .meta{font-size:10.5px;letter-spacing:.2em;color:var(--dust);margin-bottom:16px}
+.card .lab{display:flex;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.2em;color:var(--graphite);margin-bottom:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--sage)}
+.dot.deep{background:var(--indigo)}
+.chips{display:flex;flex-wrap:wrap;gap:6px 16px}
+.chips span{font-family:var(--serif)}
+.chips.s span{font-size:16px}
+.chips.d span{font-size:13.5px}
+.card .div{border-top:1px solid var(--line);margin-top:20px;padding-top:20px}
+.card .foot{margin-top:20px;font-size:11px;color:var(--dust)}
+
+.inputbox{border:1px solid var(--line);border-radius:16px;background:var(--mist)}
+textarea{width:100%;resize:none;background:transparent;border:0;outline:none;padding:20px 20px 8px;
+  font-family:var(--serif);font-size:15px;line-height:1.9;color:var(--ink);min-height:96px;max-height:220px}
+textarea::placeholder{color:var(--dust)}
+.inputfoot{display:flex;align-items:center;justify-content:space-between;padding:4px 16px 16px}
+.circ{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);background:var(--paper);color:var(--graphite);cursor:pointer;transition:opacity .2s}
+.circ.on{border-color:var(--sage);color:var(--sage)}
+.circ.send{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.circ:disabled{opacity:.25;cursor:default}
+.right{display:flex;align-items:center;gap:12px}
+.hint{font-size:11px;color:var(--sage)}
+.err{margin-top:12px;font-size:12px;color:var(--coral)}
+
+.gates{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:32px}
+.gate{border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:20px;cursor:pointer;
+  font-family:var(--serif);font-size:17px;letter-spacing:.05em;color:var(--ink);transition:opacity .2s}
+.gate:hover{opacity:.8}
+.gate.dark{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+.tail{margin-top:40px;display:flex;align-items:center;justify-content:space-between}
+.tail .count{font-size:11px;color:var(--dust);background:none;border:0;padding:0;cursor:pointer;
+  text-decoration:underline;text-underline-offset:4px;font-family:var(--sans)}
+.tail .count.plain{cursor:default;text-decoration:none}
+.tail .clear{font-size:11px;color:var(--dust);background:none;border:0;cursor:pointer;font-family:var(--sans)}
+
+.back{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--graphite);background:none;border:0;
+  cursor:pointer;margin-bottom:32px;padding:0;font-family:var(--sans)}
+body.dark .back{color:rgba(255,255,255,.55)}
+.empty{font-size:13px;line-height:1.7;color:var(--graphite)}
+body.dark .empty{color:rgba(255,255,255,.55)}
+
+.cloud{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:16px 24px;padding:32px 0;user-select:none}
+.cloud span{font-family:var(--serif);line-height:1.3;cursor:pointer;opacity:var(--o);transition:opacity .2s ease}
+.cloud:hover span{opacity:.13}
+.cloud span:hover{opacity:1}
+body.dark .cloud span{color:var(--paper)}
+#tip{position:fixed;pointer-events:none;font-size:11px;letter-spacing:.02em;color:var(--graphite);z-index:60;display:none}
+body.dark #tip{color:rgba(255,255,255,.7)}
+
+.reveal{margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,.16)}
+.reveal .lab{font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.45);margin-bottom:12px}
+.reveal .row{display:flex;flex-wrap:wrap;gap:10px 20px}
+.reveal .row span{font-family:var(--serif);font-size:13.5px}
+
+.mlist{display:flex;flex-direction:column}
+.mrow{text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 0;cursor:pointer;
+  font-family:var(--sans);transition:opacity .2s}
+.mrow:hover{opacity:.6}
+body.dark .mrow{border-bottom-color:rgba(255,255,255,.12)}
+.mrow .d{font-size:12px;letter-spacing:.02em;color:var(--ink)}
+body.dark .mrow .d{color:var(--paper)}
+.mrow .t{margin-left:12px;font-size:11px;color:var(--dust)}
+body.dark .mrow .t{color:rgba(255,255,255,.4)}
+
+.detail .stamp{font-size:11px;letter-spacing:.18em;color:var(--dust);margin-bottom:20px}
+body.dark .detail .stamp{color:rgba(255,255,255,.35)}
+.detail .text{font-family:var(--serif);font-size:15px;line-height:2;margin:0}
+.detail .meta{margin-top:20px;font-size:11.5px;color:var(--graphite)}
+body.dark .detail .meta{color:rgba(255,255,255,.5)}
+.detail .sec{margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+body.dark .detail .sec{border-top-color:rgba(255,255,255,.12)}
+.detail .sec .lab{font-size:10px;letter-spacing:.2em;color:var(--dust);margin-bottom:10px}
+
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11.5px;color:var(--graphite);margin-bottom:6px}
+.input{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:10px 12px;
+  font-size:13px;font-family:var(--sans);color:var(--ink);outline:none}
+.input:focus{border-color:var(--graphite)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.g2{grid-template-columns:1fr}}
+.btn{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:9px 16px;font-size:12.5px;
+  cursor:pointer;font-family:var(--sans);color:var(--ink)}
+.btn:hover{background:var(--mist)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.danger{color:var(--coral)}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.sechead{font-size:10px;letter-spacing:.24em;color:var(--dust);margin:36px 0 14px}
+.sechead:first-of-type{margin-top:8px}
+.tipline{font-size:11.5px;line-height:1.8;color:var(--graphite);margin:-4px 0 14px}
+.tipline.warn{color:var(--coral)}
+.rules{font-size:12px;line-height:2;color:var(--graphite);padding-left:18px;margin:0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:12px;color:var(--graphite);margin:0}
+.kv dt{color:var(--dust)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="tip"></div>
+<input type="file" id="fileIn" accept="application/json" style="display:none">
+<script>
+/* =======================================================================
+   我是谁? · Who am I?
+   记忆碎片进来,轮廓慢慢显出来。
+   AI 接口在隐藏的设置页里配置:长按标题 1.2 秒。
+======================================================================= */
+
+const STORE = "rememberme.v1";
+
+/* ------------------------- 接口服务商 ------------------------- */
+const PROVIDERS = [
+  {id:'anthropic', name:'Anthropic Claude(浏览器可直连)', proto:'anthropic', base:'https://api.anthropic.com/v1', model:'claude-sonnet-4-5', cors:'yes'},
+  {id:'gemini', name:'Google Gemini(浏览器可直连)', proto:'gemini', base:'https://generativelanguage.googleapis.com/v1beta', model:'gemini-2.0-flash', cors:'yes'},
+  {id:'openrouter', name:'OpenRouter(浏览器可直连)', proto:'openai', base:'https://openrouter.ai/api/v1', model:'openai/gpt-4o-mini', cors:'yes'},
+  {id:'openai', name:'OpenAI', proto:'openai', base:'https://api.openai.com/v1', model:'gpt-4o-mini', cors:'maybe'},
+  {id:'groq', name:'Groq', proto:'openai', base:'https://api.groq.com/openai/v1', model:'llama-3.3-70b-versatile', cors:'maybe'},
+  {id:'deepseek', name:'DeepSeek 深度求索', proto:'openai', base:'https://api.deepseek.com/v1', model:'deepseek-chat', cors:'no'},
+  {id:'moonshot', name:'Moonshot Kimi', proto:'openai', base:'https://api.moonshot.cn/v1', model:'moonshot-v1-8k', cors:'no'},
+  {id:'zhipu', name:'智谱 GLM', proto:'openai', base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4-flash', cors:'no'},
+  {id:'qwen', name:'阿里通义千问', proto:'openai', base:'https://dashscope.aliyuncs.com/compatible-mode/v1', model:'qwen-plus', cors:'no'},
+  {id:'siliconflow', name:'SiliconFlow 硅基流动', proto:'openai', base:'https://api.siliconflow.cn/v1', model:'Qwen/Qwen2.5-7B-Instruct', cors:'maybe'},
+  {id:'ollama', name:'本地 Ollama', proto:'openai', base:'http://localhost:11434/v1', model:'llama3.1', cors:'local'},
+  {id:'lmstudio', name:'本地 LM Studio', proto:'openai', base:'http://localhost:1234/v1', model:'local-model', cors:'local'},
+  {id:'custom', name:'自定义接口 / 中转', proto:'openai', base:'', model:'', cors:'maybe'}
+];
+const PROTO_NAME = {openai:'OpenAI 兼容(/chat/completions)', anthropic:'Anthropic(/messages)', gemini:'Gemini(:generateContent)'};
+const CORS_NOTE = {
+  yes:'这个服务允许浏览器直接调用,填好 Key 就能用。',
+  maybe:'不一定允许浏览器直接调用。如果失败,填下面的跨域中转。',
+  no:'官方接口只允许服务器调用,网页里一定会失败,必须填跨域中转。',
+  local:'本地模型:Ollama 需要用 OLLAMA_ORIGINS=* 启动;LM Studio 需要在设置里打开 CORS。'
+};
+
+const DEFAULTS = {
+  entries: [], surface: [], deep: [], domains: [], lang: 'zh',
+  settings: {provider:'anthropic', protocol:'anthropic', apiKey:'',
+    baseUrl:'https://api.anthropic.com/v1', model:'claude-sonnet-4-5', temperature:0.2, proxy:''}
+};
+
+let D = load();
+let view = 'home', origin = 'home', listFilter = null, openId = null, darkFlow = false;
+let busy = false, reply = null, err = '', listening = false, confirmReset = false, revealed = false;
+let rec = null;
+
+function load(){
+  try{
+    let raw = localStorage.getItem(STORE);
+    if(!raw) raw = migrate();                    // 从 React 版的存储键接管旧档案
+    if(!raw) return JSON.parse(JSON.stringify(DEFAULTS));
+    const d = JSON.parse(raw);
+    const base = JSON.parse(JSON.stringify(DEFAULTS));
+    const merged = Object.assign(base, d);
+    merged.settings = Object.assign(base.settings, d.settings || {});
+    return merged;
+  }catch(e){ return JSON.parse(JSON.stringify(DEFAULTS)); }
+}
+/* React 版用的是 self-archaeology-v1 / self-archaeology-lang 两个键。
+   如果这台浏览器上有旧档案而新键还是空的,一次性接管过来,旧键原样保留不删。 */
+function migrate(){
+  try{
+    const old = localStorage.getItem('self-archaeology-v1');
+    if(!old) return null;
+    const d = JSON.parse(old);
+    const lang = localStorage.getItem('self-archaeology-lang');
+    const base = JSON.parse(JSON.stringify(DEFAULTS));
+    const merged = Object.assign(base, {
+      entries: d.entries || [], surface: d.surface || [],
+      deep: d.deep || [], domains: d.domains || []
+    });
+    if(lang === 'zh' || lang === 'en') merged.lang = lang;
+    const s = JSON.stringify(merged);
+    localStorage.setItem(STORE, s);
+    return s;
+  }catch(e){ return null; }
+}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(D)); }catch(e){ err = t().errSave; } }
+
+/* --------------------------- 文案 --------------------------- */
+const T = {
+  zh: {
+    title:'我是谁?', subtitle:'说出一件想起来的事。一句也行,不用完整,不用按顺序。',
+    placeholder:'我小时候经常害怕犯错……', me1:'我1', me2:'我2',
+    listening:'在听', micOff:'这个环境不支持语音输入,可以直接打字。', micFail:'麦克风没能打开,可以直接打字。',
+    surfaceLabel:'浅层', deepLabel:'深层', merged:'已并入你的地图',
+    countZero:'还没有找回记忆', count:n=>`已找回 ${n} 个记忆`,
+    clear:'清空', clearWarn:'清空后无法恢复。', clearYes:'确认清空', clearNo:'取消',
+    back:'返回', empty:'这里还是空的。回到首页,说一件想起来的事。',
+    notDiagnosis:'非确诊', fromN:n=>`${n} 个记忆`,
+    errAnalyze:'分析没有完成。再发一次,或者把这段话说得短一点。',
+    errSave:'这次没能存进档案,内容还在屏幕上。',
+    noConfig:'还没有配置接口。长按标题可以进入设置。',
+    crisis:'这里只做记录和整理,处理不了此刻的重量。如果你正处在危险中,请联系当地紧急服务,或身边任何一个你还愿意打电话的人。',
+    locale:'zh-CN', speech:'zh-CN', other:'EN',
+    setConn:'AI 接口', setProvider:'服务商', setProto:'接口协议',
+    setBase:'接口地址(Base URL,不用带 /chat/completions)', setModel:'模型',
+    setTemp:'温度(越低越保守,推荐 0.2)', setProxy:'跨域中转(可选,接口不支持浏览器直连时填)',
+    setKey:'API Key', setKeyOpt:'API Key(本地模型可以留空)',
+    setSave:'保存', setTest:'测试连接', setTesting:'测试中……', setOk:'连接正常。', 
+    setIntro:'任何大模型接口都可以用。Key 只保存在这台设备的浏览器里,不会写进文件,也不会发给第三方。',
+    setData:'数据', setExport:'导出 JSON', setImport:'导入 JSON', setWipe:'清空全部数据',
+    setRules:'边界', setDone:'已保存。',
+    rules:['只整理你说过的内容,不补写、不推测你没讲的经历。',
+           '浅层词描述故事里当时的那个人,好听的和不好听的都给。',
+           '深层构念是描述性的心理学概念,不是疾病名称。',
+           '方向那一排是模式描述,不是诊断,也不代表你有任何疾病。'],
+    stat:e=>`记忆 ${e.entries.length} · 浅层词 ${e.surface.length} · 深层构念 ${e.deep.length}`
+  },
+  en: {
+    title:'Who am I?', subtitle:"Say one thing you remember. A sentence is enough — it doesn't have to be complete or in order.",
+    placeholder:'As a kid I was always afraid of getting things wrong…', me1:'Me 1', me2:'Me 2',
+    listening:'Listening', micOff:"Voice input isn't supported here. Typing works.", micFail:"The microphone didn't open. Typing works.",
+    surfaceLabel:'Surface', deepLabel:'Deep', merged:'Added to your map',
+    countZero:'No memories yet', count:n=>`${n} ${n===1?'memory':'memories'} recovered`,
+    clear:'Clear', clearWarn:"This can't be undone.", clearYes:'Clear it', clearNo:'Cancel',
+    back:'Back', empty:'Nothing here yet. Go back and say something you remember.',
+    notDiagnosis:'Not a diagnosis', fromN:n=>`${n} ${n===1?'memory':'memories'}`,
+    errAnalyze:"The analysis didn't finish. Send it again, or make it shorter.",
+    errSave:"That didn't save to your archive. It's still on screen.",
+    noConfig:'No API configured yet. Press and hold the title to open settings.',
+    crisis:"This place only records and sorts. It can't carry what you're holding right now. If you're in danger, contact your local emergency services, or anyone you'd still be willing to call.",
+    locale:'en-US', speech:'en-US', other:'中',
+    setConn:'AI connection', setProvider:'Provider', setProto:'Protocol',
+    setBase:'Base URL (no /chat/completions)', setModel:'Model',
+    setTemp:'Temperature (lower is safer, 0.2 recommended)', setProxy:'CORS proxy (optional)',
+    setKey:'API key', setKeyOpt:'API key (optional for local models)',
+    setSave:'Save', setTest:'Test', setTesting:'Testing…', setOk:'Connection works.',
+    setIntro:'Any model endpoint works. The key is stored only in this browser, never written to the file or sent anywhere else.',
+    setData:'Data', setExport:'Export JSON', setImport:'Import JSON', setWipe:'Erase everything',
+    setRules:'Boundaries', setDone:'Saved.',
+    rules:['Only organises what you actually said. Nothing is inferred or filled in.',
+           'Surface words describe the person in that story, flattering or not.',
+           'Deep terms are descriptive psychological constructs, not illness names.',
+           'The bottom row is pattern description, not a diagnosis.'],
+    stat:e=>`${e.entries.length} memories · ${e.surface.length} surface · ${e.deep.length} deep`
+  }
+};
+const t = () => T[D.lang] || T.zh;
+
+
+/* ------------------- 方向词表(写死,模型不得自创) ------------------- */
+const DOMAINS = {
+  创伤后应激方向: "Post-traumatic stress",
+  抑郁情绪方向: "Depressive mood",
+  焦虑与过度警觉方向: "Anxiety and hypervigilance",
+  社交回避方向: "Social avoidance",
+  强迫倾向方向: "Obsessive-compulsive tendency",
+  解离方向: "Dissociation",
+  情绪调节困难方向: "Emotion dysregulation",
+  依恋不安全方向: "Insecure attachment",
+  羞耻与自我否定方向: "Shame and self-negation",
+  躯体化与睡眠方向: "Somatization and sleep",
+  人际信任受损方向: "Impaired interpersonal trust",
+  注意力困难方向: "Attention difficulty",
+};
+
+/* ------------------- 提示词(与 jsx 版逐字一致) ------------------- */
+const INGEST_PROMPT = (text, digest, lang) => `你是一个长期陪伴用户做自我考古的分析引擎。用户零散地说出记忆、人生事件、突然想起的片段。你要把每个片段整理成结构化记录,并更新他的身份地图。
+
+用户已有的档案:
+${digest}
+
+用户这次输入:
+"""
+${text}
+"""
+
+请只输出一个 JSON 对象,不要有任何前后文字、不要用 markdown 代码块。结构:
+{
+  "reply": "60-110字(英文时 60-100 words)的分析。用第二人称,直接说出:当时的他在那件事里处于什么状态、表现出什么特性、这些特性是怎么被情境逼出来的、现在还在怎么运作。落到他说的细节上,不回避不好听的部分。",
+  "event": {
+    "title": "6字以内的事件名",
+    "time": "如'童年''高中''去年''不详'",
+    "ageStage": "幼年/童年/青春期/成年早期/成年/不详",
+    "people": ["涉及的人物关系"],
+    "content": "一句话事实描述",
+    "emotion": ["情绪词 2-4 个"],
+    "behavior": "他当时的行为反应,一句话"
+  },
+  "surface": [
+    {"keyword": "中文日常词", "en": "对应的英文日常词", "evidence": "这个词从这段话的哪里来,一句话"}
+  ],
+  "deep": [
+    {"term": "English psychological construct", "zh": "中文译名", "evidence": "依据,一句话", "strength": 70}
+  ],
+  "domains": [
+    {"name": "受控词表里的中文方向名", "strength": 60}
+  ],
+  "safety": "none"
+}
+
+输出语言:reply、event 各字段、evidence 一律使用${
+  lang === "en" ? "英文" : "中文"
+}。但 surface 的 keyword 字段永远写中文(它是跨语言的合并键),同时必须给出 en 字段;deep 的 term 永远写英文,zh 写中文译名;domains 的 name 永远写中文原词。
+
+规则:
+- reply 里绝对不要出现任何问句,不要反问,不要以问题结尾,不要邀请他多讲。他只想直接拿到分析结果。信息不足就基于现有内容做出有限但明确的判断。
+- surface 描述的是他在这件事发生的当下所呈现出来的特性,是对故事里那个人的客观描述,不是对他整个人的评价。以事件中实际发生的行为为准:他做了什么、没做什么、怎么反应。
+- 负面的特性必须如实给出:懦弱、退缩、讨好、隐忍、麻木、不敢开口、认命、逞强、自我怀疑。不要因为怕伤人就回避,也不要把一段被欺负、被压制的经历里的沉默说成"坚强"。
+- 正面的特性同样要给出,只要事件里真的存在:撑住了、护住了别人、忍着把事做完、事后还愿意讲出来、观察力敏锐。不要为了平衡而硬加,也不要为了深刻而只留难看的部分。哪一面在故事里更明显,就让哪一面更多。
+- surface 必须恰好给 10 个,按与这段叙述的相关度从高到低排列。必须是普通人一看就懂的日常词,禁止任何专业术语。已有的词再次出现时,keyword 用完全相同的字符串。
+- 凑满 10 个的办法是把这段叙述看得更细:他当时的姿态、说话方式、对他人的反应、对自己的反应、事后的处理方式,都可以各出一个词。不要为了凑数编造叙述里没有的内容——每一个词都必须能在他说的话里指出依据。如果材料实在太短,可以给出程度较弱、更具体的特性,但依然不许无中生有。
+- deep 给 1-4 个,使用人格心理学、依恋理论、创伤心理学、认知行为理论、精神分析、神经科学中的描述性构念,例如:Attachment Anxiety、Hypervigilance、Emotional Suppression、Maladaptive Perfectionism、Avoidant Coping、Negative Self-Schema、Conditional Self-Worth、Fear of Failure Schema、Emotional Invalidation、Parentification、Learned Helplessness、Shame-Based Identity、Identification with the Aggressor、Dissociative Detachment、Reaction Formation、Repression、Displacement、Splitting、Intellectualization、Somatization、Freeze Response。已有的构念再次出现时,term 用完全相同的英文字符串。
+- strength 是 0-100 的整数,表示这一段材料对该项的支持强度:证据直接明确给 75-95,间接推断给 40-70,只是苗头给 20-40。
+- domains 是"值得关注的方向",给 0-3 个,只能从下面这个固定词表里原样选取,不得自创、不得改写:创伤后应激方向、抑郁情绪方向、焦虑与过度警觉方向、社交回避方向、强迫倾向方向、解离方向、情绪调节困难方向、依恋不安全方向、羞耻与自我否定方向、躯体化与睡眠方向、人际信任受损方向、注意力困难方向。材料里没有依据的方向就不要给,宁可少给。
+- 绝对禁止输出任何疾病名称、诊断标签、DSM-5 或 ICD-11 分类名,以及"确诊""疑似""符合……标准"这类措辞。你做的是模式描述,不是诊断。
+- 如果输入里出现自伤、自杀、想消失或严重危机的信号,把 safety 设为 "crisis",surface、deep、domains 都返回空数组,reply 改为温柔地关心他此刻的状态、并邀请他联系身边可信任的人或专业支持。
+- 如果只是很痛苦但没有危机信号,safety 设为 "distress",其余照常。
+- 如果输入完全不是关于个人经历,reply 正常回应,event 各字段留空,surface、deep、domains 返回空数组。`;
+
+const TRANSLATE_PROMPT = (surfaceWords, deepTerms) => `把下面两组心理词汇补全成中英对照。
+
+第一组是中文日常人格词,需要英文对应词。要求:普通人一看就懂的日常英文,不要用临床术语,不要解释,一个词或一个短语。
+${JSON.stringify(surfaceWords)}
+
+第二组是英文心理学构念名,需要中文译名。要求:使用心理学中文文献里的通行译法,不要音译,不要加括号注释。
+${JSON.stringify(deepTerms)}
+
+请只输出一个 JSON 对象,不要有任何前后文字、不要用 markdown 代码块:
+{
+  "surface": {"中文词": "English word"},
+  "deep": {"English Construct": "中文译名"}
+}
+两组都必须原样使用给定的字符串作为键,一个不漏,不要新增。`;
+
+/* ------------------------- 接口调用 ------------------------- */
+function keyRequired(){ return !/localhost|127\.0\.0\.1|0\.0\.0\.0/.test(D.settings.baseUrl || ''); }
+function applyProxy(url){
+  const px = (D.settings.proxy || '').trim();
+  if(!px) return url;
+  return px.includes('{url}') ? px.replace('{url}', encodeURIComponent(url)) : px.replace(/\/+$/,'') + '/' + url;
+}
+function configured(){
+  const s = D.settings;
+  return !!(s.baseUrl && s.model && (s.apiKey || !keyRequired()));
+}
+
+async function askAI(prompt, retry){
+  const s = D.settings, proto = s.protocol || 'openai';
+  const base = (s.baseUrl || '').replace(/\/+$/,'');
+  if(!s.apiKey && keyRequired()) throw new Error('还没有配置 API Key');
+  if(!base) throw new Error('还没有填写接口地址');
+  if(!s.model) throw new Error('还没有填写模型名称');
+  const temp = +s.temperature || 0.2;
+  let url, headers, body;
+
+  if(proto === 'anthropic'){
+    url = base + '/messages';
+    headers = {'Content-Type':'application/json','x-api-key':s.apiKey,
+      'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
+    body = {model:s.model, max_tokens:1500, temperature:temp, messages:[{role:'user', content:prompt}]};
+  } else if(proto === 'gemini'){
+    url = base + '/models/' + encodeURIComponent(s.model) + ':generateContent?key=' + encodeURIComponent(s.apiKey);
+    headers = {'Content-Type':'application/json'};
+    body = {contents:[{role:'user', parts:[{text:prompt}]}],
+      generationConfig:{temperature:temp, responseMimeType:'application/json'}};
+  } else {
+    url = base + '/chat/completions';
+    headers = {'Content-Type':'application/json'};
+    if(s.apiKey) headers['Authorization'] = 'Bearer ' + s.apiKey;
+    body = {model:s.model, temperature:temp, messages:[{role:'user', content:prompt}]};
+    if(!retry) body.response_format = {type:'json_object'};
+  }
+
+  let r;
+  try{
+    r = await fetch(applyProxy(url), {method:'POST', headers, body:JSON.stringify(body)});
+  }catch(e){
+    throw new Error('请求没有发出去(' + e.message + '):浏览器被拦在跨域或网络这一步,和 Key 是否正确无关。');
+  }
+  if(!r.ok){
+    const txt = await r.text();
+    if(proto === 'openai' && !retry && (r.status === 400 || r.status === 422)) return askAI(prompt, true);
+    let msg = txt;
+    try{ const j = JSON.parse(txt); msg = (j.error && (j.error.message || j.error.type)) || j.message || txt; }catch(e){}
+    throw new Error('接口返回 ' + r.status + ':' + String(msg).slice(0, 200));
+  }
+  const j = await r.json();
+  if(proto === 'anthropic') return (j.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  if(proto === 'gemini'){
+    const c = (j.candidates || [])[0];
+    return c ? ((c.content && c.content.parts || []).map(x => x.text || '').join('')) : '';
+  }
+  const m = j.choices && j.choices[0] && j.choices[0].message;
+  return (m && (typeof m.content === 'string' ? m.content : (m.content || []).map(x => x.text || '').join(''))) || '';
+}
+
+function parseJSON(raw){
+  let x = String(raw).trim().replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+  const a = x.indexOf('{'), b = x.lastIndexOf('}');
+  if(a < 0 || b < 0) throw new Error('parse');
+  return JSON.parse(x.slice(a, b + 1));
+}
+
+function profileDigest(p){
+  const surface = p.surface.slice(0,12).map(k => `${k.keyword}(${k.weight})`).join('、');
+  const deep = p.deep.slice(0,12).map(d => `${d.term}(${d.weight})`).join('、');
+  const recent = p.entries.slice(-4).map(en => `- ${en.text.slice(0,60)}`).join('\n');
+  return `已有表层关键词:${surface || '无'}\n已有深层构念:${deep || '无'}\n最近的记忆:\n${recent || '无'}`;
+}
+
+/* ------------------------- 合并逻辑 ------------------------- */
+function scoreOf(sum, weight){
+  const avg = (sum || 50) / weight;
+  return Math.min(100, Math.round(avg * (1 + 0.16 * (weight - 1))));
+}
+const uniqIds = src => Array.from(new Set((src || []).map(x => x.entryId)));
+
+function mergeProfile(entryId, r){
+  (r.surface || []).forEach(s => {
+    if(!s || !s.keyword) return;
+    const key = String(s.keyword).trim();
+    const hit = D.surface.find(k => k.keyword === key);
+    if(hit){
+      hit.weight += 1;
+      if(s.en && !hit.en) hit.en = s.en;
+      hit.sources.push({entryId, evidence:s.evidence || ''});
+    } else {
+      D.surface.push({keyword:key, en:s.en || key, weight:1, sources:[{entryId, evidence:s.evidence || ''}]});
+    }
+  });
+
+  (r.deep || []).forEach(s => {
+    if(!s || !s.term) return;
+    const term = String(s.term).trim();
+    const st = Math.max(0, Math.min(100, Number(s.strength) || 50));
+    const hit = D.deep.find(d => d.term === term);
+    if(hit){
+      hit.weight += 1; hit.strengthSum = (hit.strengthSum || 50) + st;
+      if(s.zh && !hit.zh) hit.zh = s.zh;
+      hit.sources.push({entryId, evidence:s.evidence || ''});
+    } else {
+      D.deep.push({term, zh:s.zh || '', weight:1, strengthSum:st, sources:[{entryId, evidence:s.evidence || ''}]});
+    }
+  });
+  D.deep.forEach(d => d.score = scoreOf(d.strengthSum, d.weight));
+
+  (r.domains || []).forEach(s => {
+    if(!s || !s.name) return;
+    const name = String(s.name).trim();
+    if(!DOMAINS[name]) return;              // 只接受词表内的项
+    const st = Math.max(0, Math.min(100, Number(s.strength) || 50));
+    const hit = D.domains.find(d => d.name === name);
+    if(hit){ hit.weight += 1; hit.strengthSum = (hit.strengthSum || 50) + st; }
+    else { D.domains.push({name, weight:1, strengthSum:st}); }
+  });
+  D.domains.forEach(d => d.score = scoreOf(d.strengthSum, d.weight));
+
+  D.surface.sort((a, b) => b.weight - a.weight);
+  D.deep.sort((a, b) => (b.score || 0) - (a.score || 0));
+  D.domains.sort((a, b) => (b.score || 0) - (a.score || 0));
+}
+
+/* 补齐词云的另一种语言,每个词只翻译一次 */
+let translating = false;
+async function ensureTranslations(){
+  if(translating || !configured()) return;
+  const needEn = D.surface.filter(w => !w.en || w.en === w.keyword).map(w => w.keyword);
+  const needZh = D.deep.filter(d => !d.zh).map(d => d.term);
+  if(!needEn.length && !needZh.length) return;
+  translating = true;
+  try{
+    const r = parseJSON(await askAI(TRANSLATE_PROMPT(needEn, needZh)));
+    D.surface.forEach(w => { if(r.surface && r.surface[w.keyword]) w.en = r.surface[w.keyword]; });
+    D.deep.forEach(d => { if(r.deep && r.deep[d.term]) d.zh = r.deep[d.term]; });
+    save(); render();
+  }catch(e){ /* 翻译失败就先用原语言显示,下次再试 */ }
+  translating = false;
+}
+
+async function submit(){
+  const el = document.getElementById('inp');
+  const v = (el ? el.value : '').trim();
+  if(!v || busy) return;
+  if(!configured()){ err = t().noConfig; render(); return; }
+  busy = true; err = ''; reply = null; stopMic(); render();
+  try{
+    const r = parseJSON(await askAI(INGEST_PROMPT(v, profileDigest(D), D.lang)));
+    const entry = {id:'e' + Date.now(), text:v, at:Date.now(), event:r.event || null, safety:r.safety || 'none'};
+    D.entries.push(entry);
+    mergeProfile(entry.id, r);
+    save();
+    reply = {
+      text: r.reply || '', safety: r.safety || 'none',
+      surface: (r.surface || []).map(x => D.lang === 'en' ? (x.en || x.keyword) : x.keyword).filter(Boolean),
+      deep: (r.deep || []).map(x => D.lang === 'en' ? x.term : (x.zh || x.term)).filter(Boolean),
+      event: r.event || null
+    };
+  }catch(e){
+    err = /Key|接口|请求|返回/.test(e.message) ? e.message : t().errAnalyze;
+  }
+  busy = false; render();
+}
+
+/* ------------------------- 渲染 ------------------------- */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = ts => new Date(ts).toLocaleDateString(t().locale, {year:'numeric', month:'2-digit', day:'2-digit'});
+const fmtTime = ts => new Date(ts).toLocaleTimeString(t().locale, {hour:'2-digit', minute:'2-digit'});
+const ICON = {
+  mic:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>',
+  stop:'<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>',
+  up:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>',
+  spin:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation:sp 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>',
+  left:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>'
+};
+
+function render(){
+  darkFlow = darkFlow && (view === 'memories' || view === 'memory');
+  const dark = view === 'deep' || (darkFlow && (view === 'memories' || view === 'memory'));
+  document.body.classList.toggle('dark', dark);
+  const app = document.getElementById('app');
+  app.innerHTML =
+    `<div class="topbar"><button class="lang" data-act="lang">${esc(t().other)}</button></div>` +
+    ({home:vHome, surface:vSurface, deep:vDeep, memories:vMemories, memory:vMemory, settings:vSettings}[view] || vHome)(dark);
+  bind();
+  document.getElementById('tip').style.display = 'none';
+}
+
+const backBtn = () => `<button class="back" data-act="back">${ICON.left} ${esc(t().back)}</button>`;
+
+/* ------- 首页 ------- */
+function vHome(){
+  const n = D.entries.length, T_ = t();
+  let h = `<h1 id="ttl">${esc(T_.title)}</h1><p class="sub">${esc(T_.subtitle)}</p>`;
+
+  if(reply){
+    h += `<div class="replybox" style="margin-top:32px"><div class="reply${reply.safety === 'crisis' ? ' crisis' : ''}">
+      <p>${esc(reply.text)}</p>
+      ${reply.safety === 'crisis' ? `<p class="note">${esc(T_.crisis)}</p>` : ''}</div>`;
+    if(reply.surface.length || reply.deep.length){
+      const ev = reply.event ? [reply.event.time, reply.event.ageStage, reply.event.title].filter(Boolean).join(' · ') : '';
+      h += `<div class="card">${ev ? `<div class="meta">${esc(ev)}</div>` : ''}
+        ${reply.surface.length ? `<div><div class="lab"><span class="dot"></span>${esc(T_.surfaceLabel)}</div>
+          <div class="chips s">${reply.surface.map(k => `<span>${esc(k)}</span>`).join('')}</div></div>` : ''}
+        ${reply.deep.length ? `<div class="${reply.surface.length ? 'div' : ''}"><div class="lab"><span class="dot deep"></span>${esc(T_.deepLabel)}</div>
+          <div class="chips d">${reply.deep.map(k => `<span>${esc(k)}</span>`).join('')}</div></div>` : ''}
+        <div class="foot">${esc(T_.merged)}</div></div>`;
+    }
+    h += `</div>`;
+  } else { h += `<div style="height:32px"></div>`; }
+
+  h += `<div class="inputbox">
+      <textarea id="inp" rows="3" placeholder="${esc(T_.placeholder)}"></textarea>
+      <div class="inputfoot">
+        <button class="circ${listening ? ' on' : ''}" data-act="mic">${listening ? ICON.stop : ICON.mic}</button>
+        <div class="right">${listening ? `<span class="hint">${esc(T_.listening)}</span>` : ''}
+          <button class="circ send" data-act="send" ${busy ? 'disabled' : ''}>${busy ? ICON.spin : ICON.up}</button></div>
+      </div></div>
+    ${err ? `<p class="err">${esc(err)}</p>` : ''}
+    <div class="gates">
+      <button class="gate" data-act="go" data-v="surface">${esc(T_.me1)}</button>
+      <button class="gate dark" data-act="go" data-v="deep">${esc(T_.me2)}</button>
+    </div>
+    <div class="tail">
+      ${n === 0 ? `<span class="count plain">${esc(T_.countZero)}</span>`
+                : `<button class="count" data-act="list">${esc(T_.count(n))}</button>`}
+      ${n === 0 ? '' : (confirmReset
+        ? `<span style="font-size:11px;color:var(--graphite)">${esc(T_.clearWarn)}
+           <button class="clear" data-act="wipe" style="color:var(--coral);text-decoration:underline;margin-left:8px">${esc(T_.clearYes)}</button>
+           <button class="clear" data-act="nowipe" style="text-decoration:underline;margin-left:12px">${esc(T_.clearNo)}</button></span>`
+        : `<button class="clear" data-act="askwipe">${esc(T_.clear)}</button>`)}
+    </div>`;
+  return h;
+}
+
+/* ------- 词云 ------- */
+function cloud(items){
+  const max = Math.max(1, ...items.map(i => i.weight));
+  return `<div class="cloud" id="cloud">${items.map(it => {
+    const r = it.weight / max;
+    return `<span data-k="${esc(it.key)}" data-n="${it.count}"
+      style="font-size:${16 + Math.round(r * 25)}px;--o:${(0.42 + r * 0.58).toFixed(2)}">${esc(it.label)}</span>`;
+  }).join('')}</div>`;
+}
+
+function surfaceItems(){
+  return D.surface.map(w => {
+    const ids = uniqIds(w.sources);
+    return {key:w.keyword, label:D.lang === 'en' ? (w.en || w.keyword) : w.keyword, weight:w.weight, count:ids.length, ids};
+  });
+}
+function deepItems(){
+  return D.deep.map(d => {
+    const ids = uniqIds(d.sources);
+    return {key:d.term, label:D.lang === 'en' ? d.term : (d.zh || d.term), weight:d.weight, count:ids.length, ids};
+  });
+}
+
+function vSurface(){
+  const items = surfaceItems();
+  return backBtn() + (items.length ? cloud(items) : `<p class="empty">${esc(t().empty)}</p>`);
+}
+
+/* ------- 我2:彩蛋 -------
+   方向那一排默认不出现。条件一,记忆数量达到 REVEAL_AFTER;
+   条件二,在词云上按住不放约 HOLD_MS。两个都满足才浮出来,离开页面即收回。 */
+const REVEAL_AFTER = 8, HOLD_MS = 1200;
+
+function vDeep(){
+  const items = deepItems();
+  if(!items.length) return backBtn() + `<p class="empty">${esc(t().empty)}</p>`;
+  const doms = D.domains.slice().sort((a, b) => (b.score || 0) - (a.score || 0));
+  const unlocked = D.entries.length >= REVEAL_AFTER && doms.length > 0;
+  const shade = (i, n) => {
+    const p = n <= 1 ? 0 : i / (n - 1), from = [255,255,255], to = [104,110,124];
+    return 'rgb(' + from.map((v, k) => Math.round(v + (to[k] - v) * p)).join(',') + ')';
+  };
+  return backBtn() + cloud(items) + ((unlocked && revealed)
+    ? `<div class="reveal"><div class="lab">${esc(t().notDiagnosis)}</div><div class="row">${
+        doms.map((d, i) => `<span style="color:${shade(i, doms.length)}">${esc(D.lang === 'en' ? (DOMAINS[d.name] || d.name) : d.name)}</span>`).join('')
+      }</div></div>` : '');
+}
+
+/* ------- 记忆清单 / 详情 ------- */
+function vMemories(){
+  const list = (listFilter ? D.entries.filter(e => listFilter.ids.includes(e.id)) : D.entries).slice().reverse();
+  return backBtn() + `<div class="mlist">${list.map(e =>
+    `<button class="mrow" data-act="open" data-id="${e.id}">
+      <span class="d">${esc(fmtDate(e.at))}</span><span class="t">${esc(fmtTime(e.at))}</span></button>`).join('')}</div>`;
+}
+
+function vMemory(){
+  const e = D.entries.find(x => x.id === openId);
+  if(!e) return backBtn();
+  const sw = D.surface.filter(w => uniqIds(w.sources).includes(e.id)).map(w => D.lang === 'en' ? (w.en || w.keyword) : w.keyword);
+  const dw = D.deep.filter(d => uniqIds(d.sources).includes(e.id)).map(d => D.lang === 'en' ? d.term : (d.zh || d.term));
+  const meta = e.event ? [e.event.time, e.event.ageStage].concat(e.event.people || []).filter(Boolean).join(' · ') : '';
+  return backBtn() + `<div class="detail">
+    <div class="stamp">${esc(fmtDate(e.at))} · ${esc(fmtTime(e.at))}</div>
+    <p class="text">${esc(e.text)}</p>
+    ${meta ? `<div class="meta">${esc(meta)}</div>` : ''}
+    ${sw.length ? `<div class="sec"><div class="lab">${esc(t().surfaceLabel)}</div>
+      <div class="chips s">${sw.map(k => `<span>${esc(k)}</span>`).join('')}</div></div>` : ''}
+    ${dw.length ? `<div class="sec"><div class="lab">${esc(t().deepLabel)}</div>
+      <div class="chips d">${dw.map(k => `<span>${esc(k)}</span>`).join('')}</div></div>` : ''}
+  </div>`;
+}
+
+/* ------- 隐藏的设置页 ------- */
+function vSettings(){
+  const s = D.settings, T_ = t();
+  const p = PROVIDERS.find(x => x.id === s.provider) || {};
+  const note = CORS_NOTE[p.cors] || '';
+  return backBtn() + `
+    <div class="sechead">${esc(T_.setConn)}</div>
+    <p class="tipline">${esc(T_.setIntro)}</p>
+    <div class="g2">
+      <div class="field"><label>${esc(T_.setProvider)}</label>
+        <select class="input" id="sProvider">${PROVIDERS.map(x =>
+          `<option value="${x.id}" ${s.provider === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>${esc(T_.setProto)}</label>
+        <select class="input" id="sProto">${Object.entries(PROTO_NAME).map(([k, v]) =>
+          `<option value="${k}" ${(s.protocol || 'openai') === k ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></div>
+    </div>
+    <p class="tipline${p.cors === 'no' ? ' warn' : ''}">${esc(note)}</p>
+    <div class="field"><label>${esc(T_.setBase)}</label>
+      <input class="input" id="sBase" placeholder="https://your-endpoint/v1" value="${esc(s.baseUrl)}"></div>
+    <div class="g2">
+      <div class="field"><label>${esc(T_.setModel)}</label>
+        <input class="input" id="sModel" value="${esc(s.model)}"></div>
+      <div class="field"><label>${esc(T_.setTemp)}</label>
+        <input class="input" id="sTemp" type="number" step="0.1" min="0" max="1" value="${esc(s.temperature)}"></div>
+    </div>
+    <div class="field"><label>${esc(T_.setProxy)}</label>
+      <input class="input" id="sProxy" placeholder="https://你的中转/  或  https://你的中转/?url={url}" value="${esc(s.proxy || '')}"></div>
+    <div class="field"><label>${esc(keyRequired() ? T_.setKey : T_.setKeyOpt)}</label>
+      <input class="input" id="sKey" type="password" autocomplete="off" value="${esc(s.apiKey)}"></div>
+    <div class="row">
+      <button class="btn primary" data-act="saveset">${esc(T_.setSave)}</button>
+      <button class="btn" data-act="test">${esc(T_.setTest)}</button>
+      <span class="tipline" id="testOut" style="margin:0"></span>
+    </div>
+
+    <div class="sechead">${esc(T_.setData)}</div>
+    <dl class="kv"><dt>·</dt><dd>${esc(T_.stat(D))}</dd></dl>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" data-act="export">${esc(T_.setExport)}</button>
+      <button class="btn" data-act="import">${esc(T_.setImport)}</button>
+      <button class="btn danger" data-act="wipeall">${esc(T_.setWipe)}</button>
+    </div>
+
+    <div class="sechead">${esc(T_.setRules)}</div>
+    <ul class="rules">${T_.rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul>`;
+}
+
+/* ------------------------- 交互 ------------------------- */
+let holdTimer = null, holdFired = false, titleTimer = null;
+
+function stopMic(){ if(rec){ try{ rec.stop(); }catch(e){} } listening = false; }
+
+function toggleMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ err = t().micOff; render(); return; }
+  if(listening){ stopMic(); render(); return; }
+  try{
+    rec = new SR();
+    rec.lang = t().speech; rec.continuous = true; rec.interimResults = false;
+    rec.onresult = ev => {
+      let add = '';
+      for(let i = ev.resultIndex; i < ev.results.length; i++) if(ev.results[i].isFinal) add += ev.results[i][0].transcript;
+      const el = document.getElementById('inp');
+      if(add && el){ el.value += add; el.dispatchEvent(new Event('input')); }
+    };
+    rec.onerror = () => { listening = false; err = t().micFail; render(); };
+    rec.onend = () => { listening = false; const b = document.querySelector('[data-act="mic"]'); if(b) b.classList.remove('on'); };
+    rec.start(); listening = true; render();
+  }catch(e){ err = t().micOff; render(); }
+}
+
+function go(v, isDark){
+  origin = view; view = v; darkFlow = !!isDark; revealed = false; err = ''; render();
+}
+
+function openList(filter, isDark){
+  origin = view; listFilter = filter; darkFlow = !!isDark; view = 'memories'; render();
+}
+
+function readSettings(){
+  const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  D.settings.provider = g('sProvider');
+  D.settings.protocol = g('sProto');
+  D.settings.baseUrl  = g('sBase');
+  D.settings.model    = g('sModel');
+  D.settings.temperature = Math.max(0, Math.min(1, parseFloat(g('sTemp')) || 0.2));
+  D.settings.proxy    = g('sProxy');
+  D.settings.apiKey   = g('sKey');
+}
+
+function bind(){
+  const app = document.getElementById('app');
+
+  app.onclick = async ev => {
+    const el = ev.target.closest('[data-act]');
+    if(!el) return;
+    const act = el.dataset.act;
+
+    if(act === 'lang'){ D.lang = D.lang === 'zh' ? 'en' : 'zh'; save(); render(); ensureTranslations(); }
+    else if(act === 'back'){ view = (view === 'memory') ? 'memories' : (view === 'memories' ? origin : 'home'); render(); }
+    else if(act === 'go'){ go(el.dataset.v); }
+    else if(act === 'send'){ submit(); }
+    else if(act === 'mic'){ toggleMic(); }
+    else if(act === 'list'){ listFilter = null; openList(null, false); }
+    else if(act === 'open'){ openId = el.dataset.id; origin = 'memories'; view = 'memory'; render(); }
+    else if(act === 'askwipe'){ confirmReset = true; render(); }
+    else if(act === 'nowipe'){ confirmReset = false; render(); }
+    else if(act === 'wipe'){
+      const keep = D.settings, lang = D.lang;
+      D = JSON.parse(JSON.stringify(DEFAULTS)); D.settings = keep; D.lang = lang;
+      save(); confirmReset = false; reply = null; view = 'home'; render();
+    }
+    else if(act === 'saveset'){
+      readSettings(); save();
+      const o = document.getElementById('testOut'); if(o) o.textContent = t().setDone;
+    }
+    else if(act === 'test'){
+      readSettings(); save();
+      const o = document.getElementById('testOut');
+      if(o) o.textContent = t().setTesting;
+      try{
+        await askAI('只回一个 JSON:{"ok":true}');
+        if(o){ o.textContent = t().setOk; o.classList.remove('warn'); }
+      }catch(e){ if(o){ o.textContent = e.message; o.classList.add('warn'); } }
+    }
+    else if(act === 'export'){
+      const blob = new Blob([JSON.stringify(D, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'rememberme-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click(); URL.revokeObjectURL(a.href);
+    }
+    else if(act === 'import'){ document.getElementById('fileIn').click(); }
+    else if(act === 'wipeall'){
+      const keep = D.settings;
+      D = JSON.parse(JSON.stringify(DEFAULTS)); D.settings = keep;
+      save(); render();
+    }
+  };
+
+  /* 输入框自增高 + 快捷键 */
+  const inp = document.getElementById('inp');
+  if(inp){
+    inp.oninput = () => { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 220) + 'px'; };
+    inp.onkeydown = e => { if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit(); };
+  }
+
+  /* 隐藏入口:长按标题 1.2 秒进入设置 */
+  const ttl = document.getElementById('ttl');
+  if(ttl){
+    const start = () => { titleTimer = setTimeout(() => { view = 'settings'; origin = 'home'; render(); }, 1200); };
+    const stop = () => { clearTimeout(titleTimer); titleTimer = null; };
+    ttl.onpointerdown = start; ttl.onpointerup = stop; ttl.onpointerleave = stop; ttl.onpointercancel = stop;
+    ttl.oncontextmenu = e => e.preventDefault();
+  }
+
+  /* 词云:悬停跟随计数 + 点击进入来源清单 + 我2 长按彩蛋 */
+  const cl = document.getElementById('cloud');
+  if(cl){
+    const tip = document.getElementById('tip');
+    cl.onpointermove = e => {
+      const s = e.target.closest('span[data-k]');
+      if(!s){ tip.style.display = 'none'; return; }
+      tip.textContent = t().fromN(+s.dataset.n);
+      tip.style.left = (e.clientX + 16) + 'px';
+      tip.style.top = (e.clientY + 16) + 'px';
+      tip.style.display = 'block';
+    };
+    cl.onpointerleave = () => { tip.style.display = 'none'; };
+
+    cl.onclick = e => {
+      const s = e.target.closest('span[data-k]');
+      if(!s) return;
+      if(holdFired){ holdFired = false; return; }
+      const items = view === 'deep' ? deepItems() : surfaceItems();
+      const hit = items.find(i => i.key === s.dataset.k);
+      if(hit) openList({label:hit.label, ids:hit.ids}, view === 'deep');
+    };
+
+    if(view === 'deep'){
+      const doms = D.domains.length;
+      const unlocked = D.entries.length >= REVEAL_AFTER && doms > 0;
+      cl.onpointerdown = () => {
+        if(!unlocked || revealed) return;
+        holdTimer = setTimeout(() => { holdFired = true; revealed = true; render(); }, HOLD_MS);
+      };
+      const cancel = () => { clearTimeout(holdTimer); holdTimer = null; };
+      cl.onpointerup = cancel; cl.onpointercancel = cancel;
+    }
+  }
+}
+
+/* 导入 */
+document.getElementById('fileIn').onchange = e => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const d = JSON.parse(r.result);
+      const base = JSON.parse(JSON.stringify(DEFAULTS));
+      D = Object.assign(base, d);
+      D.settings = Object.assign(base.settings, d.settings || {});
+      save(); view = 'home'; render();
+    }catch(err2){ alert('文件读不出来'); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+};
+
+const style = document.createElement('style');
+style.textContent = '@keyframes sp{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+
+render();
+if(configured()) ensureTranslations();
+
+</script>
+</body>
 </html>
