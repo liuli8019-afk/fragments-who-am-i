@@ -145,26 +145,37 @@ const STORE = "rememberme.v1";
 
 /* ------------------------- 接口服务商 ------------------------- */
 const PROVIDERS = [
-  {id:'anthropic', name:'Anthropic Claude(浏览器可直连)', proto:'anthropic', base:'https://api.anthropic.com/v1', model:'claude-sonnet-4-5', cors:'yes'},
-  {id:'gemini', name:'Google Gemini(浏览器可直连)', proto:'gemini', base:'https://generativelanguage.googleapis.com/v1beta', model:'gemini-2.0-flash', cors:'yes'},
-  {id:'openrouter', name:'OpenRouter(浏览器可直连)', proto:'openai', base:'https://openrouter.ai/api/v1', model:'openai/gpt-4o-mini', cors:'yes'},
-  {id:'openai', name:'OpenAI', proto:'openai', base:'https://api.openai.com/v1', model:'gpt-4o-mini', cors:'maybe'},
-  {id:'groq', name:'Groq', proto:'openai', base:'https://api.groq.com/openai/v1', model:'llama-3.3-70b-versatile', cors:'maybe'},
-  {id:'deepseek', name:'DeepSeek 深度求索', proto:'openai', base:'https://api.deepseek.com/v1', model:'deepseek-chat', cors:'no'},
-  {id:'moonshot', name:'Moonshot Kimi', proto:'openai', base:'https://api.moonshot.cn/v1', model:'moonshot-v1-8k', cors:'no'},
-  {id:'zhipu', name:'智谱 GLM', proto:'openai', base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4-flash', cors:'no'},
-  {id:'qwen', name:'阿里通义千问', proto:'openai', base:'https://dashscope.aliyuncs.com/compatible-mode/v1', model:'qwen-plus', cors:'no'},
-  {id:'siliconflow', name:'SiliconFlow 硅基流动', proto:'openai', base:'https://api.siliconflow.cn/v1', model:'Qwen/Qwen2.5-7B-Instruct', cors:'maybe'},
-  {id:'ollama', name:'本地 Ollama', proto:'openai', base:'http://localhost:11434/v1', model:'llama3.1', cors:'local'},
-  {id:'lmstudio', name:'本地 LM Studio', proto:'openai', base:'http://localhost:1234/v1', model:'local-model', cors:'local'},
-  {id:'custom', name:'自定义接口 / 中转', proto:'openai', base:'', model:'', cors:'maybe'}
+  {id:'anthropic', name:'Anthropic Claude(浏览器可直连)', nameEn:'Anthropic Claude (direct from browser)', proto:'anthropic', base:'https://api.anthropic.com/v1', model:'claude-sonnet-4-5', cors:'yes'},
+  {id:'gemini', name:'Google Gemini(浏览器可直连)', nameEn:'Google Gemini (direct from browser)', proto:'gemini', base:'https://generativelanguage.googleapis.com/v1beta', model:'gemini-2.0-flash', cors:'yes'},
+  {id:'openrouter', name:'OpenRouter(浏览器可直连)', nameEn:'OpenRouter (direct from browser)', proto:'openai', base:'https://openrouter.ai/api/v1', model:'openai/gpt-4o-mini', cors:'yes'},
+  {id:'openai', name:'OpenAI', nameEn:'OpenAI', proto:'openai', base:'https://api.openai.com/v1', model:'gpt-4o-mini', cors:'maybe'},
+  {id:'groq', name:'Groq', nameEn:'Groq', proto:'openai', base:'https://api.groq.com/openai/v1', model:'llama-3.3-70b-versatile', cors:'maybe'},
+  {id:'deepseek', name:'DeepSeek 深度求索', nameEn:'DeepSeek', proto:'openai', base:'https://api.deepseek.com/v1', model:'deepseek-chat', cors:'no'},
+  {id:'moonshot', name:'Moonshot Kimi', nameEn:'Moonshot Kimi', proto:'openai', base:'https://api.moonshot.cn/v1', model:'moonshot-v1-8k', cors:'no'},
+  {id:'zhipu', name:'智谱 GLM', nameEn:'Zhipu GLM', proto:'openai', base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4-flash', cors:'no'},
+  {id:'qwen', name:'阿里通义千问', nameEn:'Alibaba Qwen', proto:'openai', base:'https://dashscope.aliyuncs.com/compatible-mode/v1', model:'qwen-plus', cors:'no'},
+  {id:'siliconflow', name:'SiliconFlow 硅基流动', nameEn:'SiliconFlow', proto:'openai', base:'https://api.siliconflow.cn/v1', model:'Qwen/Qwen2.5-7B-Instruct', cors:'maybe'},
+  {id:'ollama', name:'本地 Ollama', nameEn:'Local Ollama', proto:'openai', base:'http://localhost:11434/v1', model:'llama3.1', cors:'local'},
+  {id:'lmstudio', name:'本地 LM Studio', nameEn:'Local LM Studio', proto:'openai', base:'http://localhost:1234/v1', model:'local-model', cors:'local'},
+  {id:'custom', name:'自定义接口 / 中转', nameEn:'Custom endpoint / relay', proto:'openai', base:'', model:'', cors:'maybe'}
 ];
-const PROTO_NAME = {openai:'OpenAI 兼容(/chat/completions)', anthropic:'Anthropic(/messages)', gemini:'Gemini(:generateContent)'};
+const PROTO_NAME = {
+  zh:{openai:'OpenAI 兼容(/chat/completions)', anthropic:'Anthropic(/messages)', gemini:'Gemini(:generateContent)'},
+  en:{openai:'OpenAI compatible (/chat/completions)', anthropic:'Anthropic (/messages)', gemini:'Gemini (:generateContent)'}
+};
 const CORS_NOTE = {
-  yes:'这个服务允许浏览器直接调用,填好 Key 就能用。',
-  maybe:'不一定允许浏览器直接调用。如果失败,填下面的跨域中转。',
-  no:'官方接口只允许服务器调用,网页里一定会失败,必须填跨域中转。',
-  local:'本地模型:Ollama 需要用 OLLAMA_ORIGINS=* 启动;LM Studio 需要在设置里打开 CORS。'
+  zh:{
+    yes:'这个服务允许浏览器直接调用,填好 Key 就能用。',
+    maybe:'不一定允许浏览器直接调用。如果失败,填下面的跨域中转。',
+    no:'官方接口只允许服务器调用,网页里一定会失败,必须填跨域中转。',
+    local:'本地模型:Ollama 需要用 OLLAMA_ORIGINS=* 启动;LM Studio 需要在设置里打开 CORS。'
+  },
+  en:{
+    yes:'This service allows direct browser calls. Just add your key.',
+    maybe:'May not allow direct browser calls. If it fails, add a CORS relay below.',
+    no:'The official endpoint is server-only and will always fail in a browser. A CORS relay is required.',
+    local:'Local models: start Ollama with OLLAMA_ORIGINS=*, or enable CORS in LM Studio settings.'
+  }
 };
 
 const DEFAULTS = {
@@ -174,7 +185,12 @@ const DEFAULTS = {
 };
 
 let D = load();
-let view = 'home', origin = 'home', listFilter = null, openId = null, darkFlow = false;
+/* 导航栈:栈底永远是 home,每一帧带着自己的筛选条件和主题,
+   退回上一层时这些附属状态跟着一起恢复。 */
+let stack = [{view:'home', filter:null, id:null, dark:false}];
+const frame = () => stack[stack.length - 1];   // 不要叫 top:window.top 是只读全局,顶层同名声明会让整段脚本报语法错
+function push(frame){ stack = stack.concat([Object.assign({view:'home', filter:null, id:null, dark:false}, frame)]); revealed = false; err = ''; render(); }
+function pop(){ if(stack.length > 1) stack = stack.slice(0, -1); revealed = false; render(); }
 let busy = false, reply = null, err = '', listening = false, confirmReset = false, revealed = false;
 let rec = null;
 
@@ -231,10 +247,15 @@ const T = {
     setBase:'接口地址(Base URL,不用带 /chat/completions)', setModel:'模型',
     setTemp:'温度(越低越保守,推荐 0.2)', setProxy:'跨域中转(可选,接口不支持浏览器直连时填)',
     setKey:'API Key', setKeyOpt:'API Key(本地模型可以留空)',
+    errNoKey:'还没有配置 API Key', errNoBase:'还没有填写接口地址', errNoModel:'还没有填写模型名称',
+    errNetwork:m=>`请求没有发出去(${m}):浏览器被拦在跨域或网络这一步,和 Key 是否正确无关。`,
+    errUpstream:(code,msg)=>`接口返回 ${code}:${msg}`,
     setSave:'保存', setTest:'测试连接', setTesting:'测试中……', setOk:'连接正常。', 
     setIntro:'任何大模型接口都可以用。Key 只保存在这台设备的浏览器里,不会写进文件,也不会发给第三方。',
     setData:'数据', setExport:'导出 JSON', setImport:'导入 JSON', setWipe:'清空全部数据',
     setRules:'边界', setDone:'已保存。',
+    proxyPh:'https://你的中转/  或  https://你的中转/?url={url}',
+    importFail:'文件读不出来',
     rules:['只整理你说过的内容,不补写、不推测你没讲的经历。',
            '浅层词描述故事里当时的那个人,好听的和不好听的都给。',
            '深层构念是描述性的心理学概念,不是疾病名称。',
@@ -259,10 +280,15 @@ const T = {
     setBase:'Base URL (no /chat/completions)', setModel:'Model',
     setTemp:'Temperature (lower is safer, 0.2 recommended)', setProxy:'CORS proxy (optional)',
     setKey:'API key', setKeyOpt:'API key (optional for local models)',
+    errNoKey:'No API key configured yet', errNoBase:'Base URL is empty', errNoModel:'Model name is empty',
+    errNetwork:m=>`The request never left the browser (${m}). It was blocked at the CORS or network layer — this is unrelated to whether your key is correct.`,
+    errUpstream:(code,msg)=>`Endpoint returned ${code}: ${msg}`,
     setSave:'Save', setTest:'Test', setTesting:'Testing…', setOk:'Connection works.',
     setIntro:'Any model endpoint works. The key is stored only in this browser, never written to the file or sent anywhere else.',
     setData:'Data', setExport:'Export JSON', setImport:'Import JSON', setWipe:'Erase everything',
     setRules:'Boundaries', setDone:'Saved.',
+    proxyPh:'https://your-relay/  or  https://your-relay/?url={url}',
+    importFail:"That file couldn't be read",
     rules:['Only organises what you actually said. Nothing is inferred or filled in.',
            'Surface words describe the person in that story, flattering or not.',
            'Deep terms are descriptive psychological constructs, not illness names.',
@@ -326,15 +352,17 @@ ${text}
 
 输出语言:reply、event 各字段、evidence 一律使用${
   lang === "en" ? "英文" : "中文"
-}。但 surface 的 keyword 字段永远写中文(它是跨语言的合并键),同时必须给出 en 字段;deep 的 term 永远写英文,zh 写中文译名;domains 的 name 永远写中文原词。
+}。但下面这几个字段的语言是固定的,不跟界面语言走,也绝对不要对调:surface 的 keyword 必须是中文(它是跨语言的合并键)、en 必须是英文;deep 的 term 必须是英文、zh 必须是中文译名;domains 的 name 必须是中文原词。
 
 规则:
 - reply 里绝对不要出现任何问句,不要反问,不要以问题结尾,不要邀请他多讲。他只想直接拿到分析结果。信息不足就基于现有内容做出有限但明确的判断。
 - surface 描述的是他在这件事发生的当下所呈现出来的特性,是对故事里那个人的客观描述,不是对他整个人的评价。以事件中实际发生的行为为准:他做了什么、没做什么、怎么反应。
-- 负面的特性必须如实给出:懦弱、退缩、讨好、隐忍、麻木、不敢开口、认命、逞强、自我怀疑。不要因为怕伤人就回避,也不要把一段被欺负、被压制的经历里的沉默说成"坚强"。
-- 正面的特性同样要给出,只要事件里真的存在:撑住了、护住了别人、忍着把事做完、事后还愿意讲出来、观察力敏锐。不要为了平衡而硬加,也不要为了深刻而只留难看的部分。哪一面在故事里更明显,就让哪一面更多。
-- surface 必须恰好给 10 个,按与这段叙述的相关度从高到低排列。必须是普通人一看就懂的日常词,禁止任何专业术语。已有的词再次出现时,keyword 用完全相同的字符串。
-- 凑满 10 个的办法是把这段叙述看得更细:他当时的姿态、说话方式、对他人的反应、对自己的反应、事后的处理方式,都可以各出一个词。不要为了凑数编造叙述里没有的内容——每一个词都必须能在他说的话里指出依据。如果材料实在太短,可以给出程度较弱、更具体的特性,但依然不许无中生有。
+- 难看的特性如实给出:懦弱、退缩、讨好、隐忍、麻木、不敢开口、认命、逞强、自我怀疑。不要因为怕伤人就回避,也不要把一段被欺负、被压制的经历里的沉默说成"坚强"。
+- 好的特性同样如实给出:撑住了、护住了别人、忍着把事做完、没有还手但也没有认同、给自己留了退路、察觉到了不对劲、事后自己消化掉了、还愿意靠近人。
+- 哪一面在故事里更明显,就让哪一面更多。两边都不要替他修饰,也都不要替他加码。
+- 特性必须属于故事里那个人在事件发生当时。禁止从叙述行为本身提取特性——记得清楚、表达清晰、愿意讲出来、记忆完整、条理分明、观察力敏锐,这些是今天在讲述的人的属性,不是当年在场的人的属性,一律不要。
+- surface 最多给 10 个,至少 3 个,按与这段叙述的相关度从高到低排列。有多少给多少,凑不满就少给。必须是普通人一看就懂的日常词,禁止任何专业术语。已有的词再次出现时,keyword 用完全相同的字符串。
+- 想多给几个的办法是把这段叙述看得更细:他当时的姿态、说话方式、对他人的反应、对自己的反应、事后的处理方式,都可以各出一个词。但每一个词都必须能在他说的话里指出依据。严禁为了凑数编造叙述里没有的内容,也严禁在没词可给时转而去描述他的叙述行为。宁可只给 3 个。
 - deep 给 1-4 个,使用人格心理学、依恋理论、创伤心理学、认知行为理论、精神分析、神经科学中的描述性构念,例如:Attachment Anxiety、Hypervigilance、Emotional Suppression、Maladaptive Perfectionism、Avoidant Coping、Negative Self-Schema、Conditional Self-Worth、Fear of Failure Schema、Emotional Invalidation、Parentification、Learned Helplessness、Shame-Based Identity、Identification with the Aggressor、Dissociative Detachment、Reaction Formation、Repression、Displacement、Splitting、Intellectualization、Somatization、Freeze Response。已有的构念再次出现时,term 用完全相同的英文字符串。
 - strength 是 0-100 的整数,表示这一段材料对该项的支持强度:证据直接明确给 75-95,间接推断给 40-70,只是苗头给 20-40。
 - domains 是"值得关注的方向",给 0-3 个,只能从下面这个固定词表里原样选取,不得自创、不得改写:创伤后应激方向、抑郁情绪方向、焦虑与过度警觉方向、社交回避方向、强迫倾向方向、解离方向、情绪调节困难方向、依恋不安全方向、羞耻与自我否定方向、躯体化与睡眠方向、人际信任受损方向、注意力困难方向。材料里没有依据的方向就不要给,宁可少给。
@@ -373,9 +401,9 @@ function configured(){
 async function askAI(prompt, retry){
   const s = D.settings, proto = s.protocol || 'openai';
   const base = (s.baseUrl || '').replace(/\/+$/,'');
-  if(!s.apiKey && keyRequired()) throw new Error('还没有配置 API Key');
-  if(!base) throw new Error('还没有填写接口地址');
-  if(!s.model) throw new Error('还没有填写模型名称');
+  if(!s.apiKey && keyRequired()) throw new Error(t().errNoKey);
+  if(!base) throw new Error(t().errNoBase);
+  if(!s.model) throw new Error(t().errNoModel);
   const temp = +s.temperature || 0.2;
   let url, headers, body;
 
@@ -401,14 +429,14 @@ async function askAI(prompt, retry){
   try{
     r = await fetch(applyProxy(url), {method:'POST', headers, body:JSON.stringify(body)});
   }catch(e){
-    throw new Error('请求没有发出去(' + e.message + '):浏览器被拦在跨域或网络这一步,和 Key 是否正确无关。');
+    throw new Error(t().errNetwork(e.message));
   }
   if(!r.ok){
     const txt = await r.text();
     if(proto === 'openai' && !retry && (r.status === 400 || r.status === 422)) return askAI(prompt, true);
     let msg = txt;
     try{ const j = JSON.parse(txt); msg = (j.error && (j.error.message || j.error.type)) || j.message || txt; }catch(e){}
-    throw new Error('接口返回 ' + r.status + ':' + String(msg).slice(0, 200));
+    throw new Error(t().errUpstream(r.status, String(msg).slice(0, 200)));
   }
   const j = await r.json();
   if(proto === 'anthropic') return (j.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
@@ -434,6 +462,34 @@ function profileDigest(p){
   return `已有表层关键词:${surface || '无'}\n已有深层构念:${deep || '无'}\n最近的记忆:\n${recent || '无'}`;
 }
 
+/* ------------------------- 字段语言归一 -------------------------
+   浅层词固定为 keyword=中文 / en=英文,深层构念固定为 term=英文 / zh=中文。
+   模型偶尔会把两个字段整个对调,导致中文界面显示英文、英文界面显示中文。
+   这里在落库前纠正,并对已经存歪的老数据做一次性迁移。 */
+const hasCJK = x => /[\u4e00-\u9fff]/.test(String(x || ''));
+
+function fixSurfaceWord(w){
+  if(!w) return w;
+  if(w.keyword && w.en && !hasCJK(w.keyword) && hasCJK(w.en)){
+    const k = w.keyword; w.keyword = w.en; w.en = k;
+  }
+  return w;
+}
+function fixDeepTerm(d){
+  if(!d) return d;
+  if(d.term && d.zh && hasCJK(d.term) && !hasCJK(d.zh)){
+    const x = d.term; d.term = d.zh; d.zh = x;
+  }
+  return d;
+}
+function migrateLangFields(){
+  if(D.langFixedAt) return;
+  D.surface.forEach(fixSurfaceWord);
+  D.deep.forEach(fixDeepTerm);
+  D.langFixedAt = Date.now();
+  save();
+}
+
 /* ------------------------- 合并逻辑 ------------------------- */
 function scoreOf(sum, weight){
   const avg = (sum || 50) / weight;
@@ -444,6 +500,7 @@ const uniqIds = src => Array.from(new Set((src || []).map(x => x.entryId)));
 function mergeProfile(entryId, r){
   (r.surface || []).forEach(s => {
     if(!s || !s.keyword) return;
+    fixSurfaceWord(s);
     const key = String(s.keyword).trim();
     const hit = D.surface.find(k => k.keyword === key);
     if(hit){
@@ -457,6 +514,7 @@ function mergeProfile(entryId, r){
 
   (r.deep || []).forEach(s => {
     if(!s || !s.term) return;
+    fixDeepTerm(s);
     const term = String(s.term).trim();
     const st = Math.max(0, Math.min(100, Number(s.strength) || 50));
     const hit = D.deep.find(d => d.term === term);
@@ -522,7 +580,9 @@ async function submit(){
       event: r.event || null
     };
   }catch(e){
-    err = /Key|接口|请求|返回/.test(e.message) ? e.message : t().errAnalyze;
+    // 接口层的报错(缺 Key、跨域、上游状态码)原样透出,解析失败才用通用文案
+    err = /API key|Base URL|Model name|Endpoint returned|never left the browser|Key|接口|请求没有发出去|接口返回/.test(e.message)
+      ? e.message : t().errAnalyze;
   }
   busy = false; render();
 }
@@ -540,8 +600,8 @@ const ICON = {
 };
 
 function render(){
-  darkFlow = darkFlow && (view === 'memories' || view === 'memory');
-  const dark = view === 'deep' || (darkFlow && (view === 'memories' || view === 'memory'));
+  const f = frame(), view = f.view;
+  const dark = view === 'deep' || f.dark;
   document.body.classList.toggle('dark', dark);
   const app = document.getElementById('app');
   app.innerHTML =
@@ -648,14 +708,15 @@ function vDeep(){
 
 /* ------- 记忆清单 / 详情 ------- */
 function vMemories(){
-  const list = (listFilter ? D.entries.filter(e => listFilter.ids.includes(e.id)) : D.entries).slice().reverse();
+  const filter = frame().filter;
+  const list = (filter ? D.entries.filter(e => filter.ids.includes(e.id)) : D.entries).slice().reverse();
   return backBtn() + `<div class="mlist">${list.map(e =>
     `<button class="mrow" data-act="open" data-id="${e.id}">
       <span class="d">${esc(fmtDate(e.at))}</span><span class="t">${esc(fmtTime(e.at))}</span></button>`).join('')}</div>`;
 }
 
 function vMemory(){
-  const e = D.entries.find(x => x.id === openId);
+  const e = D.entries.find(x => x.id === frame().id);
   if(!e) return backBtn();
   const sw = D.surface.filter(w => uniqIds(w.sources).includes(e.id)).map(w => D.lang === 'en' ? (w.en || w.keyword) : w.keyword);
   const dw = D.deep.filter(d => uniqIds(d.sources).includes(e.id)).map(d => D.lang === 'en' ? d.term : (d.zh || d.term));
@@ -675,16 +736,17 @@ function vMemory(){
 function vSettings(){
   const s = D.settings, T_ = t();
   const p = PROVIDERS.find(x => x.id === s.provider) || {};
-  const note = CORS_NOTE[p.cors] || '';
+  const note = (CORS_NOTE[D.lang] || CORS_NOTE.zh)[p.cors] || '';
+  const protoNames = PROTO_NAME[D.lang] || PROTO_NAME.zh;
   return backBtn() + `
     <div class="sechead">${esc(T_.setConn)}</div>
     <p class="tipline">${esc(T_.setIntro)}</p>
     <div class="g2">
       <div class="field"><label>${esc(T_.setProvider)}</label>
         <select class="input" id="sProvider">${PROVIDERS.map(x =>
-          `<option value="${x.id}" ${s.provider === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>
+          `<option value="${x.id}" ${s.provider === x.id ? 'selected' : ''}>${esc(D.lang === 'en' ? (x.nameEn || x.name) : x.name)}</option>`).join('')}</select></div>
       <div class="field"><label>${esc(T_.setProto)}</label>
-        <select class="input" id="sProto">${Object.entries(PROTO_NAME).map(([k, v]) =>
+        <select class="input" id="sProto">${Object.entries(protoNames).map(([k, v]) =>
           `<option value="${k}" ${(s.protocol || 'openai') === k ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></div>
     </div>
     <p class="tipline${p.cors === 'no' ? ' warn' : ''}">${esc(note)}</p>
@@ -697,7 +759,7 @@ function vSettings(){
         <input class="input" id="sTemp" type="number" step="0.1" min="0" max="1" value="${esc(s.temperature)}"></div>
     </div>
     <div class="field"><label>${esc(T_.setProxy)}</label>
-      <input class="input" id="sProxy" placeholder="https://你的中转/  或  https://你的中转/?url={url}" value="${esc(s.proxy || '')}"></div>
+      <input class="input" id="sProxy" placeholder="${esc(t().proxyPh)}" value="${esc(s.proxy || '')}"></div>
     <div class="field"><label>${esc(keyRequired() ? T_.setKey : T_.setKeyOpt)}</label>
       <input class="input" id="sKey" type="password" autocomplete="off" value="${esc(s.apiKey)}"></div>
     <div class="row">
@@ -742,13 +804,7 @@ function toggleMic(){
   }catch(e){ err = t().micOff; render(); }
 }
 
-function go(v, isDark){
-  origin = view; view = v; darkFlow = !!isDark; revealed = false; err = ''; render();
-}
-
-function openList(filter, isDark){
-  origin = view; listFilter = filter; darkFlow = !!isDark; view = 'memories'; render();
-}
+function openList(filter, isDark){ push({view:'memories', filter, dark:!!isDark}); }
 
 function readSettings(){
   const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
@@ -770,18 +826,18 @@ function bind(){
     const act = el.dataset.act;
 
     if(act === 'lang'){ D.lang = D.lang === 'zh' ? 'en' : 'zh'; save(); render(); ensureTranslations(); }
-    else if(act === 'back'){ view = (view === 'memory') ? 'memories' : (view === 'memories' ? origin : 'home'); render(); }
-    else if(act === 'go'){ go(el.dataset.v); }
+    else if(act === 'back'){ pop(); }
+    else if(act === 'go'){ push({view:el.dataset.v, dark:el.dataset.v === 'deep'}); }
     else if(act === 'send'){ submit(); }
     else if(act === 'mic'){ toggleMic(); }
-    else if(act === 'list'){ listFilter = null; openList(null, false); }
-    else if(act === 'open'){ openId = el.dataset.id; origin = 'memories'; view = 'memory'; render(); }
+    else if(act === 'list'){ openList(null, false); }
+    else if(act === 'open'){ push({view:'memory', id:el.dataset.id, filter:frame().filter, dark:frame().dark}); }
     else if(act === 'askwipe'){ confirmReset = true; render(); }
     else if(act === 'nowipe'){ confirmReset = false; render(); }
     else if(act === 'wipe'){
       const keep = D.settings, lang = D.lang;
       D = JSON.parse(JSON.stringify(DEFAULTS)); D.settings = keep; D.lang = lang;
-      save(); confirmReset = false; reply = null; view = 'home'; render();
+      save(); confirmReset = false; reply = null; stack = [{view:'home', filter:null, id:null, dark:false}]; render();
     }
     else if(act === 'saveset'){
       readSettings(); save();
@@ -811,17 +867,45 @@ function bind(){
     }
   };
 
+  /* 选服务商时自动带出协议与默认地址 */
+  const sp = document.getElementById('sProvider');
+  if(sp){
+    sp.onchange = () => {
+      const x = PROVIDERS.find(v => v.id === sp.value);
+      if(!x) return;
+      D.settings.provider = x.id;
+      D.settings.protocol = x.proto;
+      if(x.base) D.settings.baseUrl = x.base;
+      if(x.model) D.settings.model = x.model;
+      render();
+    };
+  }
+
   /* 输入框自增高 + 快捷键 */
   const inp = document.getElementById('inp');
   if(inp){
     inp.oninput = () => { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 220) + 'px'; };
-    inp.onkeydown = e => { if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit(); };
+    /* 回车发送,Shift+回车换行。
+       两个必须处理的情况:中文输入法组字过程中的回车是"选词",不能当发送;
+       触屏软键盘的回车通常就是换行,发送只走按钮。 */
+    let composing = false;
+    inp.oncompositionstart = () => { composing = true; };
+    inp.oncompositionend = () => { composing = false; };
+    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    inp.onkeydown = e => {
+      if(e.key !== 'Enter') return;
+      if(e.metaKey || e.ctrlKey){ e.preventDefault(); submit(); return; }
+      if(composing || e.isComposing || e.keyCode === 229) return;
+      if(e.shiftKey || coarse) return;
+      e.preventDefault();
+      submit();
+    };
   }
 
   /* 隐藏入口:长按标题 1.2 秒进入设置 */
   const ttl = document.getElementById('ttl');
   if(ttl){
-    const start = () => { titleTimer = setTimeout(() => { view = 'settings'; origin = 'home'; render(); }, 1200); };
+    const start = () => { titleTimer = setTimeout(() => push({view:'settings'}), 1200); };
     const stop = () => { clearTimeout(titleTimer); titleTimer = null; };
     ttl.onpointerdown = start; ttl.onpointerup = stop; ttl.onpointerleave = stop; ttl.onpointercancel = stop;
     ttl.oncontextmenu = e => e.preventDefault();
@@ -845,12 +929,13 @@ function bind(){
       const s = e.target.closest('span[data-k]');
       if(!s) return;
       if(holdFired){ holdFired = false; return; }
-      const items = view === 'deep' ? deepItems() : surfaceItems();
+      const isDeep = frame().view === 'deep';
+      const items = isDeep ? deepItems() : surfaceItems();
       const hit = items.find(i => i.key === s.dataset.k);
-      if(hit) openList({label:hit.label, ids:hit.ids}, view === 'deep');
+      if(hit) openList({label:hit.label, ids:hit.ids}, isDeep);
     };
 
-    if(view === 'deep'){
+    if(frame().view === 'deep'){
       const doms = D.domains.length;
       const unlocked = D.entries.length >= REVEAL_AFTER && doms > 0;
       cl.onpointerdown = () => {
@@ -874,8 +959,8 @@ document.getElementById('fileIn').onchange = e => {
       const base = JSON.parse(JSON.stringify(DEFAULTS));
       D = Object.assign(base, d);
       D.settings = Object.assign(base.settings, d.settings || {});
-      save(); view = 'home'; render();
-    }catch(err2){ alert('文件读不出来'); }
+      save(); stack = [{view:'home', filter:null, id:null, dark:false}]; render();
+    }catch(err2){ alert(t().importFail); }
   };
   r.readAsText(f);
   e.target.value = '';
@@ -885,6 +970,7 @@ const style = document.createElement('style');
 style.textContent = '@keyframes sp{to{transform:rotate(360deg)}}';
 document.head.appendChild(style);
 
+migrateLangFields();
 render();
 if(configured()) ensureTranslations();
 
