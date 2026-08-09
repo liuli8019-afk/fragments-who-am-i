@@ -7,9 +7,12 @@ This is a single-file project without strict semantic versioning; entries are re
 ## 2026-08-09
 
 ### Added
-- The analysis paragraph is now generated in both Chinese and English on every submission (`reply.zh` / `reply.en` in the prompt response), stored on the entry, and picked based on the current UI language — switching languages updates it instantly instead of leaving it stuck in whatever language it was first generated in.
+- The analysis paragraph is now generated in both Chinese and English on every submission (`replyZh` / `replyEn` in the prompt response), stored on the entry, and picked based on the current UI language — switching languages updates it instantly instead of leaving it stuck in whatever language it was first generated in.
 - The analysis text is now saved per memory and shown on that memory's detail page, not just transiently on the home page right after submitting.
 - Each row in the memory list now has a delete button. Deleting is immediate and reversible: a small "Deleted · Undo" bar appears, restoring the exact prior state (entry plus every surface/deep/domain contribution it made) if clicked. The undo window closes once you navigate away from the list.
+
+### Fixed
+- Fixed the analysis card sometimes showing blank even though the memory, its surface words, and deep constructs were all merged and saved correctly. Cause: the bilingual reply schema added earlier was nested (`reply: {zh, en}`), and not every model followed that nested shape reliably — when it didn't, both fields silently resolved to empty strings. Changed the schema to two flat top-level fields (`replyZh` / `replyEn`, no nesting), and added a fallback that also accepts a plain legacy `reply` string or the old nested shape, so a non-conforming response still shows something instead of a blank card. Display now also falls back to whichever language field a model did fill in, if the other one is empty.
 
 ### Changed
 - Default UI language changed from Chinese to English: the app now opens in English on first load, and `<html lang>` / the page title follow suit. You can still switch back to Chinese via the button in the top-right corner; existing data is unaffected.

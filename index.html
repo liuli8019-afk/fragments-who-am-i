@@ -363,9 +363,9 @@ const DOMAINS = {
 /* ------------------- 提示词(与 jsx 版逐字一致) ------------------- */
 const INGEST_PROMPT = (text, digest, lang) => `你是一个长期陪伴用户做自我考古的分析引擎。用户零散地说出记忆、人生事件、突然想起的片段。你要把每个片段整理成结构化记录,并更新他的身份地图。
 
-[语言强制 / LANGUAGE OVERRIDE] 不管这条说明本身用的是什么语言,也不管用户这次输入用的是什么语言:reply 字段必须**同时**给出中文和英文两个独立版本(结构见下面的 reply.zh / reply.en);event 各字段、evidence 只需要用「${
+[语言强制 / LANGUAGE OVERRIDE] 不管这条说明本身用的是什么语言,也不管用户这次输入用的是什么语言:必须**同时**给出 replyZh 和 replyEn 这两个独立字段(两个都不能省略、都不能留空);event 各字段、evidence 只需要用「${
   lang === "en" ? "英文 English" : "中文 Chinese"
-}」写一份,不要混入其他语言,也不要因为用户这次是用另一种语言写的就跟着切换。/ Regardless of what language this instruction is written in, and regardless of what language the user's input below happens to be in: the "reply" field must include **both** a Chinese and an English version (see reply.zh / reply.en below); every "event" field and every "evidence" field only need to be written in ${
+}」写一份,不要混入其他语言,也不要因为用户这次是用另一种语言写的就跟着切换。/ Regardless of what language this instruction is written in, and regardless of what language the user's input below happens to be in: you must include **both** the replyZh and replyEn fields (neither may be omitted or left empty); every "event" field and every "evidence" field only need to be written in ${
   lang === "en" ? "English" : "Chinese"
 }. Do not mix languages there, and do not switch to match the language of the user's input.
 
@@ -379,10 +379,8 @@ ${text}
 
 请只输出一个 JSON 对象,不要有任何前后文字、不要用 markdown 代码块。结构:
 {
-  "reply": {
-    "zh": "60-110字的中文分析。用第二人称,直接说出:当时的他在那件事里处于什么状态、表现出什么特性、这些特性是怎么被情境逼出来的、现在还在怎么运作。落到他说的细节上,不回避不好听的部分。",
-    "en": "60-100 words, second person, covering the same points as the Chinese version above (what state he was in, what traits showed up, how the situation forced them out, how they still operate now) — an independently natural English version, not a literal translation."
-  },
+  "replyZh": "60-110字的中文分析。用第二人称,直接说出:当时的他在那件事里处于什么状态、表现出什么特性、这些特性是怎么被情境逼出来的、现在还在怎么运作。落到他说的细节上,不回避不好听的部分。",
+  "replyEn": "60-100 words, second person, covering the same points as replyZh above (what state he was in, what traits showed up, how the situation forced them out, how they still operate now) — an independently natural English version, not a literal translation of replyZh.",
   "event": {
     "title": "6字以内的事件名",
     "time": "如'童年''高中''去年''不详'",
@@ -404,7 +402,7 @@ ${text}
   "safety": "none"
 }
 
-输出语言:reply 必须同时给出 zh、en 两个版本,两版内容、语气一致,但各自要读起来像母语者写的,不要有互译腔。event 各字段、evidence 一律使用${
+输出语言:replyZh、replyEn 两个字段必须都给,不能只给一个或者留空,两版内容、语气一致,但各自要读起来像母语者写的,不要有互译腔。event 各字段、evidence 一律使用${
   lang === "en" ? "英文" : "中文"
 }。但下面这几个字段的语言是固定的,不跟界面语言走,也绝对不要对调:surface 的 keyword 必须是中文(它是跨语言的合并键)、en 必须是英文;deep 的 term 必须是英文、zh 必须是中文译名;domains 的 name 必须是中文原词。
 
@@ -673,9 +671,22 @@ async function submit(){
   busy = true; err = ''; reply = null; stopMic(); render();
   try{
     const r = parseJSON(await askAI(INGEST_PROMPT(v, profileDigest(D), D.lang)));
+    /* 正常情况下模型会按 schema 给 replyZh/replyEn 两个字段。但不是所有模型都乖乖照做——
+       弱一点的模型有时会退回旧的单字段习惯(顶层 "reply" 是个字符串,或者仍然嵌套成
+       {reply:{zh,en}})。这里做多形状兜底,不然会出现"其实分析完了、合并也成功了,
+       就是卡片上一片空白"的情况:merge 那部分 schema 没变过,一直很稳,只有 reply 这块
+       新加的双语结构可能不被完全遵守。 */
+    let replyZh = r.replyZh || '', replyEn = r.replyEn || '';
+    if(!replyZh && !replyEn && r.reply){
+      if(typeof r.reply === 'string'){
+        if(D.lang === 'en') replyEn = r.reply; else replyZh = r.reply;
+      } else if(typeof r.reply === 'object'){
+        replyZh = r.reply.zh || replyZh; replyEn = r.reply.en || replyEn;
+      }
+    }
     const entry = {
       id:'e' + Date.now(), text:v, at:Date.now(), event:r.event || null, safety:r.safety || 'none',
-      replyZh: (r.reply && r.reply.zh) || '', replyEn: (r.reply && r.reply.en) || ''
+      replyZh, replyEn
     };
     D.entries.push(entry);
     mergeProfile(entry.id, r);
@@ -752,7 +763,9 @@ function vHome(){
     // 分析文字和浅层/深层词都从 entry / D.surface / D.deep 实时取,而不是提交那一刻冻结的快照——
     // 这样切语言、或者 ensureTranslations() 回填翻译之后,这张卡片会跟着刷新,不会停留在旧语言上。
     const replyEntry = D.entries.find(x => x.id === reply.entryId);
-    const replyText = replyEntry ? (D.lang === 'en' ? replyEntry.replyEn : replyEntry.replyZh) : '';
+    const replyText = replyEntry
+      ? (D.lang === 'en' ? (replyEntry.replyEn || replyEntry.replyZh) : (replyEntry.replyZh || replyEntry.replyEn))
+      : '';
     const replySurface = D.surface.filter(w => uniqIds(w.sources).includes(reply.entryId))
       .map(w => D.lang === 'en' ? (w.en || w.keyword) : w.keyword);
     const replyDeep = D.deep.filter(d => uniqIds(d.sources).includes(reply.entryId))
@@ -865,7 +878,8 @@ function vMemory(){
   const dw = D.deep.filter(d => uniqIds(d.sources).includes(e.id)).map(d => D.lang === 'en' ? d.term : (d.zh || d.term));
   const meta = e.event ? [e.event.time, e.event.ageStage].concat(e.event.people || []).filter(Boolean).join(' · ') : '';
   // 老记忆(这次更新之前存的)没有 replyZh/replyEn,analysis 会是空字符串,直接不显示这个区块。
-  const analysis = D.lang === 'en' ? (e.replyEn || '') : (e.replyZh || '');
+  // 语言优先取当前界面语言,缺了就退而求其次显示另一种,总比一片空白强。
+  const analysis = D.lang === 'en' ? (e.replyEn || e.replyZh || '') : (e.replyZh || e.replyEn || '');
   return backBtn() + `<div class="detail">
     <div class="stamp">${esc(fmtDate(e.at))} · ${esc(fmtTime(e.at))}</div>
     <p class="text">${esc(e.text)}</p>
