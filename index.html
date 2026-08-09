@@ -263,7 +263,7 @@ const T = {
       '如果你最近很难受,这个工具能帮你整理,但接不住那份重量——建议找一个信任的人聊聊,或寻求专业支持。'
     ],
     introOk:'我知道了,继续',
-    deepFooter:'以上是基于你写下的内容做的可能的模式描述,不是诊断。数据只留在这台设备上。如果最近很难受,建议找信任的人聊聊。',
+    deepFooter:'以上是基于你写下的内容做的可能的模式描述,不是诊断。数据只留在这台设备上。如果最近很难受,建议找信任的人聊聊或者寻求专业的帮助。',
     locale:'zh-CN', speech:'zh-CN', other:'EN',
     setConn:'AI 接口', setProvider:'服务商', setProto:'接口协议',
     setBase:'接口地址(Base URL,不用带 /chat/completions)', setModel:'模型',
@@ -305,7 +305,7 @@ const T = {
       "If you've been having a hard time lately, this tool can help you organize your thoughts, but it can't carry that weight — please talk to someone you trust, or reach out for professional support."
     ],
     introOk:'I understand, continue',
-    deepFooter:"The above is a possible pattern description based on what you wrote, not a diagnosis. Data stays on this device only. If things have been hard lately, please talk to someone you trust.",
+    deepFooter:"The above is a possible pattern description based on what you wrote, not a diagnosis. Data stays on this device only. If things have been hard lately, please talk to someone you trust or seek professional support.",
     locale:'en-US', speech:'en-US', other:'中',
     setConn:'AI connection', setProvider:'Provider', setProto:'Protocol',
     setBase:'Base URL (no /chat/completions)', setModel:'Model',
@@ -349,6 +349,12 @@ const DOMAINS = {
 
 /* ------------------- 提示词(与 jsx 版逐字一致) ------------------- */
 const INGEST_PROMPT = (text, digest, lang) => `你是一个长期陪伴用户做自我考古的分析引擎。用户零散地说出记忆、人生事件、突然想起的片段。你要把每个片段整理成结构化记录,并更新他的身份地图。
+
+[语言强制 / LANGUAGE OVERRIDE] 不管这条说明本身用的是什么语言,也不管用户这次输入用的是什么语言,下面 JSON 里的 reply、event 各字段、evidence 必须全部用「${
+  lang === "en" ? "英文 English" : "中文 Chinese"
+}」写,不要混入其他语言,也不要因为用户这次是用另一种语言写的就跟着切换。/ Regardless of what language this instruction is written in, and regardless of what language the user's input below happens to be in, the "reply" field, every "event" field, and every "evidence" field in the JSON must be written entirely in ${
+  lang === "en" ? "English" : "Chinese"
+}. Do not mix languages, and do not switch to match the language of the user's input.
 
 用户已有的档案:
 ${digest}
@@ -607,8 +613,7 @@ async function submit(){
     save();
     reply = {
       text: r.reply || '', safety: r.safety || 'none',
-      surface: (r.surface || []).map(x => D.lang === 'en' ? (x.en || x.keyword) : x.keyword).filter(Boolean),
-      deep: (r.deep || []).map(x => D.lang === 'en' ? x.term : (x.zh || x.term)).filter(Boolean),
+      entryId: entry.id,
       event: r.event || null
     };
   }catch(e){
@@ -617,6 +622,10 @@ async function submit(){
       ? e.message : t().errAnalyze;
   }
   busy = false; render();
+  /* 新词第一次出现时,模型有时不给 en/zh 翻译字段,merge 时会退化成用中文关键词
+     兜底(见 mergeProfile)。这里立刻补一次翻译,而不是等到切语言或刷新页面才修正——
+     reply 的浅层/深层词是从 D.surface/D.deep 实时取的(见 vHome),翻译回填后会自动更新。 */
+  if(!err) ensureTranslations();
 }
 
 /* ------------------------- 渲染 ------------------------- */
@@ -672,16 +681,22 @@ function vHome(){
   let h = `<h1 id="ttl">${esc(T_.title)}</h1><p class="sub">${esc(T_.subtitle)}</p>`;
 
   if(reply){
+    // 从 D.surface/D.deep 实时取这条记忆贡献的词,而不是提交那一刻冻结的翻译——
+    // 这样 ensureTranslations() 回填英文/中文之后,这张卡片会跟着刷新,不会停留在旧语言上。
+    const replySurface = D.surface.filter(w => uniqIds(w.sources).includes(reply.entryId))
+      .map(w => D.lang === 'en' ? (w.en || w.keyword) : w.keyword);
+    const replyDeep = D.deep.filter(d => uniqIds(d.sources).includes(reply.entryId))
+      .map(d => D.lang === 'en' ? d.term : (d.zh || d.term));
     h += `<div class="replybox" style="margin-top:32px"><div class="reply${reply.safety === 'crisis' ? ' crisis' : ''}">
       <p>${esc(reply.text)}</p>
       ${reply.safety === 'crisis' ? `<p class="note">${esc(T_.crisis)}</p>` : ''}</div>`;
-    if(reply.surface.length || reply.deep.length){
+    if(replySurface.length || replyDeep.length){
       const ev = reply.event ? [reply.event.time, reply.event.ageStage, reply.event.title].filter(Boolean).join(' · ') : '';
       h += `<div class="card">${ev ? `<div class="meta">${esc(ev)}</div>` : ''}
-        ${reply.surface.length ? `<div><div class="lab"><span class="dot"></span>${esc(T_.surfaceLabel)}</div>
-          <div class="chips s">${reply.surface.map(k => `<span>${esc(k)}</span>`).join('')}</div></div>` : ''}
-        ${reply.deep.length ? `<div class="${reply.surface.length ? 'div' : ''}"><div class="lab"><span class="dot deep"></span>${esc(T_.deepLabel)}</div>
-          <div class="chips d">${reply.deep.map(k => `<span>${esc(k)}</span>`).join('')}</div></div>` : ''}
+        ${replySurface.length ? `<div><div class="lab"><span class="dot"></span>${esc(T_.surfaceLabel)}</div>
+          <div class="chips s">${replySurface.map(k => `<span>${esc(k)}</span>`).join('')}</div></div>` : ''}
+        ${replyDeep.length ? `<div class="${replySurface.length ? 'div' : ''}"><div class="lab"><span class="dot deep"></span>${esc(T_.deepLabel)}</div>
+          <div class="chips d">${replyDeep.map(k => `<span>${esc(k)}</span>`).join('')}</div></div>` : ''}
         <div class="foot">${esc(T_.merged)}</div></div>`;
     }
     h += `</div>`;

@@ -23,6 +23,11 @@ This is a single-file project without strict semantic versioning; entries are re
 - The first-launch card is now always bilingual — English on top, Chinese below with a divider — regardless of the app's current UI language, instead of only showing whichever language was active.
 - README opening tagline expanded: "One HTML file. Minimal by design. Made for fun and personal journaling — if it happens to help, great, but it is absolutely not a professional diagnosis."
 - The "Deeper psychological constructs" feature bullet now reads "Deeper psychological constructs, for reference," to underline that it's a reference, not a finding.
+- Deep-cloud footnote now also suggests seeking professional support, not just talking to someone you trust.
+
+### Fixed
+- Fixed the just-submitted analysis card frequently showing Chinese words even with the UI set to English. Root cause: when the model skipped the optional `en` translation field for a brand-new word, `mergeProfile` fell back to the Chinese keyword, and the reply card had frozen its labels at submit time — so it never picked up the correction that `ensureTranslations()` would otherwise backfill. Fixed by (1) deriving the reply card's word chips live from `D.surface` / `D.deep` instead of a frozen snapshot, so they update automatically once a translation arrives, and (2) calling `ensureTranslations()` immediately after every submit instead of only at boot or on a language toggle.
+- Strengthened the prompt's language instruction: it's now stated up front, bilingually, and explicitly says to ignore both the prompt's own language and the language of the user's input — models were sometimes drifting toward Chinese for the `reply`/`event`/`evidence` fields even when English was requested.
 
 ## 2026-08-08
 
