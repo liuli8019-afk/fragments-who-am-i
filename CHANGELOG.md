@@ -6,6 +6,11 @@ This is a single-file project without strict semantic versioning; entries are re
 
 ## 2026-08-09
 
+### Added
+- The analysis paragraph is now generated in both Chinese and English on every submission (`reply.zh` / `reply.en` in the prompt response), stored on the entry, and picked based on the current UI language — switching languages updates it instantly instead of leaving it stuck in whatever language it was first generated in.
+- The analysis text is now saved per memory and shown on that memory's detail page, not just transiently on the home page right after submitting.
+- Each row in the memory list now has a delete button. Deleting is immediate and reversible: a small "Deleted · Undo" bar appears, restoring the exact prior state (entry plus every surface/deep/domain contribution it made) if clicked. The undo window closes once you navigate away from the list.
+
 ### Changed
 - Default UI language changed from Chinese to English: the app now opens in English on first load, and `<html lang>` / the page title follow suit. You can still switch back to Chinese via the button in the top-right corner; existing data is unaffected.
 - Added project documentation: `LICENSE` (MIT), `PRIVACY.md` (privacy notes), `CHANGELOG.md` (this file), and `config.example.js` (an API config reference — not loaded automatically).

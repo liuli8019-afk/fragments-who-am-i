@@ -90,14 +90,25 @@ body.dark #tip{color:rgba(255,255,255,.7)}
 .reveal .row span{font-family:var(--serif);font-size:13.5px}
 
 .mlist{display:flex;flex-direction:column}
-.mrow{text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 0;cursor:pointer;
-  font-family:var(--sans);transition:opacity .2s}
-.mrow:hover{opacity:.6}
+.mrow{display:flex;align-items:center;border-bottom:1px solid var(--line)}
 body.dark .mrow{border-bottom-color:rgba(255,255,255,.12)}
-.mrow .d{font-size:12px;letter-spacing:.02em;color:var(--ink)}
-body.dark .mrow .d{color:var(--paper)}
-.mrow .t{margin-left:12px;font-size:11px;color:var(--dust)}
-body.dark .mrow .t{color:rgba(255,255,255,.4)}
+.mrow-open{flex:1;text-align:left;background:none;border:0;padding:12px 0;cursor:pointer;
+  font-family:var(--sans);transition:opacity .2s}
+.mrow-open:hover{opacity:.6}
+.mrow-open .d{font-size:12px;letter-spacing:.02em;color:var(--ink)}
+body.dark .mrow-open .d{color:var(--paper)}
+.mrow-open .t{margin-left:12px;font-size:11px;color:var(--dust)}
+body.dark .mrow-open .t{color:rgba(255,255,255,.4)}
+.mrow-del{background:none;border:0;padding:8px 4px;margin-left:8px;color:var(--dust);cursor:pointer;
+  display:flex;align-items:center;flex-shrink:0;transition:color .2s}
+.mrow-del:hover{color:var(--coral)}
+body.dark .mrow-del{color:rgba(255,255,255,.35)}
+.undobar{display:flex;align-items:center;justify-content:space-between;padding:10px 0;margin-bottom:4px;
+  font-size:12px;color:var(--graphite);border-bottom:1px solid var(--line);font-family:var(--sans)}
+body.dark .undobar{color:rgba(255,255,255,.55);border-bottom-color:rgba(255,255,255,.12)}
+.undobar button{background:none;border:0;color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+  cursor:pointer;font-family:var(--sans);font-size:12px;padding:0}
+body.dark .undobar button{color:var(--paper)}
 
 .detail .stamp{font-size:11px;letter-spacing:.18em;color:var(--dust);margin-bottom:20px}
 body.dark .detail .stamp{color:rgba(255,255,255,.35)}
@@ -203,9 +214,9 @@ let D = load();
    退回上一层时这些附属状态跟着一起恢复。 */
 let stack = [{view:'home', filter:null, id:null, dark:false}];
 const frame = () => stack[stack.length - 1];   // 不要叫 top:window.top 是只读全局,顶层同名声明会让整段脚本报语法错
-function push(frame){ stack = stack.concat([Object.assign({view:'home', filter:null, id:null, dark:false}, frame)]); revealed = false; err = ''; render(); }
-function pop(){ if(stack.length > 1) stack = stack.slice(0, -1); revealed = false; render(); }
-let busy = false, reply = null, err = '', listening = false, confirmReset = false, revealed = false;
+function push(frame){ stack = stack.concat([Object.assign({view:'home', filter:null, id:null, dark:false}, frame)]); revealed = false; err = ''; trash = null; render(); }
+function pop(){ if(stack.length > 1) stack = stack.slice(0, -1); revealed = false; trash = null; render(); }
+let busy = false, reply = null, err = '', listening = false, confirmReset = false, revealed = false, trash = null;
 let rec = null;
 
 function load(){
@@ -247,7 +258,8 @@ const T = {
     title:'我是谁?', subtitle:'说出一件想起来的事。一句也行,不用完整,不用按顺序。',
     placeholder:'我小时候经常害怕犯错……', me1:'我1', me2:'我2',
     listening:'在听', micOff:'这个环境不支持语音输入,可以直接打字。', micFail:'麦克风没能打开,可以直接打字。',
-    surfaceLabel:'浅层', deepLabel:'深层', merged:'已并入你的地图',
+    surfaceLabel:'浅层', deepLabel:'深层', merged:'已并入你的地图', analysisLabel:'分析',
+    del:'删除', deleted:'已删除', undo:'撤销',
     countZero:'还没有找回记忆', count:n=>`已找回 ${n} 个记忆`,
     clear:'清空', clearWarn:'清空后无法恢复。', clearYes:'确认清空', clearNo:'取消',
     back:'返回', empty:'这里还是空的。回到首页,说一件想起来的事。',
@@ -289,7 +301,8 @@ const T = {
     title:'Who am I?', subtitle:"Say one thing you remember. A sentence is enough — it doesn't have to be complete or in order.",
     placeholder:'As a kid I was always afraid of getting things wrong…', me1:'Me 1', me2:'Me 2',
     listening:'Listening', micOff:"Voice input isn't supported here. Typing works.", micFail:"The microphone didn't open. Typing works.",
-    surfaceLabel:'Surface', deepLabel:'Deep', merged:'Added to your map',
+    surfaceLabel:'Surface', deepLabel:'Deep', merged:'Added to your map', analysisLabel:'Analysis',
+    del:'Delete', deleted:'Deleted', undo:'Undo',
     countZero:'No memories yet', count:n=>`${n} ${n===1?'memory':'memories'} recovered`,
     clear:'Clear', clearWarn:"This can't be undone.", clearYes:'Clear it', clearNo:'Cancel',
     back:'Back', empty:'Nothing here yet. Go back and say something you remember.',
@@ -350,11 +363,11 @@ const DOMAINS = {
 /* ------------------- 提示词(与 jsx 版逐字一致) ------------------- */
 const INGEST_PROMPT = (text, digest, lang) => `你是一个长期陪伴用户做自我考古的分析引擎。用户零散地说出记忆、人生事件、突然想起的片段。你要把每个片段整理成结构化记录,并更新他的身份地图。
 
-[语言强制 / LANGUAGE OVERRIDE] 不管这条说明本身用的是什么语言,也不管用户这次输入用的是什么语言,下面 JSON 里的 reply、event 各字段、evidence 必须全部用「${
+[语言强制 / LANGUAGE OVERRIDE] 不管这条说明本身用的是什么语言,也不管用户这次输入用的是什么语言:reply 字段必须**同时**给出中文和英文两个独立版本(结构见下面的 reply.zh / reply.en);event 各字段、evidence 只需要用「${
   lang === "en" ? "英文 English" : "中文 Chinese"
-}」写,不要混入其他语言,也不要因为用户这次是用另一种语言写的就跟着切换。/ Regardless of what language this instruction is written in, and regardless of what language the user's input below happens to be in, the "reply" field, every "event" field, and every "evidence" field in the JSON must be written entirely in ${
+}」写一份,不要混入其他语言,也不要因为用户这次是用另一种语言写的就跟着切换。/ Regardless of what language this instruction is written in, and regardless of what language the user's input below happens to be in: the "reply" field must include **both** a Chinese and an English version (see reply.zh / reply.en below); every "event" field and every "evidence" field only need to be written in ${
   lang === "en" ? "English" : "Chinese"
-}. Do not mix languages, and do not switch to match the language of the user's input.
+}. Do not mix languages there, and do not switch to match the language of the user's input.
 
 用户已有的档案:
 ${digest}
@@ -366,7 +379,10 @@ ${text}
 
 请只输出一个 JSON 对象,不要有任何前后文字、不要用 markdown 代码块。结构:
 {
-  "reply": "60-110字(英文时 60-100 words)的分析。用第二人称,直接说出:当时的他在那件事里处于什么状态、表现出什么特性、这些特性是怎么被情境逼出来的、现在还在怎么运作。落到他说的细节上,不回避不好听的部分。",
+  "reply": {
+    "zh": "60-110字的中文分析。用第二人称,直接说出:当时的他在那件事里处于什么状态、表现出什么特性、这些特性是怎么被情境逼出来的、现在还在怎么运作。落到他说的细节上,不回避不好听的部分。",
+    "en": "60-100 words, second person, covering the same points as the Chinese version above (what state he was in, what traits showed up, how the situation forced them out, how they still operate now) — an independently natural English version, not a literal translation."
+  },
   "event": {
     "title": "6字以内的事件名",
     "time": "如'童年''高中''去年''不详'",
@@ -388,7 +404,7 @@ ${text}
   "safety": "none"
 }
 
-输出语言:reply、event 各字段、evidence 一律使用${
+输出语言:reply 必须同时给出 zh、en 两个版本,两版内容、语气一致,但各自要读起来像母语者写的,不要有互译腔。event 各字段、evidence 一律使用${
   lang === "en" ? "英文" : "中文"
 }。但下面这几个字段的语言是固定的,不跟界面语言走,也绝对不要对调:surface 的 keyword 必须是中文(它是跨语言的合并键)、en 必须是英文;deep 的 term 必须是英文、zh 必须是中文译名;domains 的 name 必须是中文原词。
 
@@ -559,9 +575,9 @@ function mergeProfile(entryId, r){
     if(hit){
       hit.weight += 1; hit.strengthSum = (hit.strengthSum || 50) + st;
       if(s.zh && !hit.zh) hit.zh = s.zh;
-      hit.sources.push({entryId, evidence:s.evidence || ''});
+      hit.sources.push({entryId, evidence:s.evidence || '', strength:st});
     } else {
-      D.deep.push({term, zh:s.zh || '', weight:1, strengthSum:st, sources:[{entryId, evidence:s.evidence || ''}]});
+      D.deep.push({term, zh:s.zh || '', weight:1, strengthSum:st, sources:[{entryId, evidence:s.evidence || '', strength:st}]});
     }
   });
   D.deep.forEach(d => d.score = scoreOf(d.strengthSum, d.weight));
@@ -572,14 +588,64 @@ function mergeProfile(entryId, r){
     if(!DOMAINS[name]) return;              // 只接受词表内的项
     const st = Math.max(0, Math.min(100, Number(s.strength) || 50));
     const hit = D.domains.find(d => d.name === name);
-    if(hit){ hit.weight += 1; hit.strengthSum = (hit.strengthSum || 50) + st; }
-    else { D.domains.push({name, weight:1, strengthSum:st}); }
+    if(hit){ hit.weight += 1; hit.strengthSum = (hit.strengthSum || 50) + st; hit.sources.push({entryId, strength:st}); }
+    else { D.domains.push({name, weight:1, strengthSum:st, sources:[{entryId, strength:st}]}); }
   });
   D.domains.forEach(d => d.score = scoreOf(d.strengthSum, d.weight));
 
   D.surface.sort((a, b) => b.weight - a.weight);
   D.deep.sort((a, b) => (b.score || 0) - (a.score || 0));
   D.domains.sort((a, b) => (b.score || 0) - (a.score || 0));
+}
+
+/* deep / domains 条目都是 {weight, strengthSum, sources:[{entryId, strength}], score} 形状,
+   删除一条记忆时用同一套逻辑退回权重和强度:按 entryId 找出这条记忆贡献的 source(s),
+   减掉对应的 weight / strengthSum,权重归零就整条删掉。 */
+function unmergeWeighted(list, entryId){
+  return list.filter(item => {
+    const removed = (item.sources || []).filter(s => s.entryId === entryId);
+    if(!removed.length) return true;
+    item.sources = item.sources.filter(s => s.entryId !== entryId);
+    const avgFallback = item.weight ? (item.strengthSum || 0) / item.weight : 0;
+    const removedStrength = removed.reduce((sum, s) => sum + (typeof s.strength === 'number' ? s.strength : avgFallback), 0);
+    item.weight -= removed.length;
+    item.strengthSum = Math.max(0, (item.strengthSum || 0) - removedStrength);
+    if(item.weight > 0) item.score = scoreOf(item.strengthSum, item.weight);
+    return item.weight > 0 && item.sources.length > 0;
+  });
+}
+
+/* 删除一条记忆:退回它对浅层词/深层构念/方向的贡献,再从记忆列表里移除。
+   撤销不做精确的逆运算,而是删除前整份 D 存一份快照,点撤销就原样换回去——
+   比反着重放 mergeProfile 简单也更不容易出错。只保留最近一次删除可撤销。 */
+function deleteEntry(id){
+  const idx = D.entries.findIndex(e => e.id === id);
+  if(idx < 0) return;
+  trash = JSON.parse(JSON.stringify(D));
+  D.entries.splice(idx, 1);
+
+  D.surface = D.surface.filter(w => {
+    const before = w.sources.length;
+    w.sources = w.sources.filter(s => s.entryId !== id);
+    const removed = before - w.sources.length;
+    if(!removed) return true;
+    w.weight -= removed;
+    return w.weight > 0 && w.sources.length > 0;
+  });
+  D.deep = unmergeWeighted(D.deep, id);
+  D.domains = unmergeWeighted(D.domains, id);
+
+  D.surface.sort((a, b) => b.weight - a.weight);
+  D.deep.sort((a, b) => (b.score || 0) - (a.score || 0));
+  D.domains.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  save(); render();
+}
+
+function undoDelete(){
+  if(!trash) return;
+  D = trash; trash = null;
+  save(); render();
 }
 
 /* 补齐词云的另一种语言,每个词只翻译一次 */
@@ -607,15 +673,16 @@ async function submit(){
   busy = true; err = ''; reply = null; stopMic(); render();
   try{
     const r = parseJSON(await askAI(INGEST_PROMPT(v, profileDigest(D), D.lang)));
-    const entry = {id:'e' + Date.now(), text:v, at:Date.now(), event:r.event || null, safety:r.safety || 'none'};
+    const entry = {
+      id:'e' + Date.now(), text:v, at:Date.now(), event:r.event || null, safety:r.safety || 'none',
+      replyZh: (r.reply && r.reply.zh) || '', replyEn: (r.reply && r.reply.en) || ''
+    };
     D.entries.push(entry);
     mergeProfile(entry.id, r);
     save();
-    reply = {
-      text: r.reply || '', safety: r.safety || 'none',
-      entryId: entry.id,
-      event: r.event || null
-    };
+    // reply 只存 entryId:分析文字和浅层/深层词都从 entry / D.surface / D.deep 实时取,
+    // 这样切语言或翻译回填之后,首页卡片和记忆详情页会自动跟着更新,不会停在提交那一刻的语言上。
+    reply = { entryId: entry.id, safety: r.safety || 'none', event: r.event || null };
   }catch(e){
     // 接口层的报错(缺 Key、跨域、上游状态码)原样透出,解析失败才用通用文案
     err = /API key|Base URL|Model name|Endpoint returned|never left the browser|Key|接口|请求没有发出去|接口返回/.test(e.message)
@@ -637,7 +704,8 @@ const ICON = {
   stop:'<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>',
   up:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>',
   spin:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation:sp 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>',
-  left:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>'
+  left:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
+  trash:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>'
 };
 
 function render(){
@@ -681,14 +749,16 @@ function vHome(){
   let h = `<h1 id="ttl">${esc(T_.title)}</h1><p class="sub">${esc(T_.subtitle)}</p>`;
 
   if(reply){
-    // 从 D.surface/D.deep 实时取这条记忆贡献的词,而不是提交那一刻冻结的翻译——
-    // 这样 ensureTranslations() 回填英文/中文之后,这张卡片会跟着刷新,不会停留在旧语言上。
+    // 分析文字和浅层/深层词都从 entry / D.surface / D.deep 实时取,而不是提交那一刻冻结的快照——
+    // 这样切语言、或者 ensureTranslations() 回填翻译之后,这张卡片会跟着刷新,不会停留在旧语言上。
+    const replyEntry = D.entries.find(x => x.id === reply.entryId);
+    const replyText = replyEntry ? (D.lang === 'en' ? replyEntry.replyEn : replyEntry.replyZh) : '';
     const replySurface = D.surface.filter(w => uniqIds(w.sources).includes(reply.entryId))
       .map(w => D.lang === 'en' ? (w.en || w.keyword) : w.keyword);
     const replyDeep = D.deep.filter(d => uniqIds(d.sources).includes(reply.entryId))
       .map(d => D.lang === 'en' ? d.term : (d.zh || d.term));
     h += `<div class="replybox" style="margin-top:32px"><div class="reply${reply.safety === 'crisis' ? ' crisis' : ''}">
-      <p>${esc(reply.text)}</p>
+      <p>${esc(replyText)}</p>
       ${reply.safety === 'crisis' ? `<p class="note">${esc(T_.crisis)}</p>` : ''}</div>`;
     if(replySurface.length || replyDeep.length){
       const ev = reply.event ? [reply.event.time, reply.event.ageStage, reply.event.title].filter(Boolean).join(' · ') : '';
@@ -776,11 +846,16 @@ function vDeep(){
 
 /* ------- 记忆清单 / 详情 ------- */
 function vMemories(){
-  const filter = frame().filter;
+  const filter = frame().filter, T_ = t();
   const list = (filter ? D.entries.filter(e => filter.ids.includes(e.id)) : D.entries).slice().reverse();
-  return backBtn() + `<div class="mlist">${list.map(e =>
-    `<button class="mrow" data-act="open" data-id="${e.id}">
-      <span class="d">${esc(fmtDate(e.at))}</span><span class="t">${esc(fmtTime(e.at))}</span></button>`).join('')}</div>`;
+  const undobar = trash ? `<div class="undobar"><span>${esc(T_.deleted)}</span>
+      <button type="button" data-act="undo">${esc(T_.undo)}</button></div>` : '';
+  return backBtn() + undobar + `<div class="mlist">${list.map(e =>
+    `<div class="mrow">
+      <button class="mrow-open" data-act="open" data-id="${e.id}">
+        <span class="d">${esc(fmtDate(e.at))}</span><span class="t">${esc(fmtTime(e.at))}</span></button>
+      <button class="mrow-del" data-act="del" data-id="${e.id}" title="${esc(T_.del)}" aria-label="${esc(T_.del)}">${ICON.trash}</button>
+    </div>`).join('')}</div>`;
 }
 
 function vMemory(){
@@ -789,10 +864,14 @@ function vMemory(){
   const sw = D.surface.filter(w => uniqIds(w.sources).includes(e.id)).map(w => D.lang === 'en' ? (w.en || w.keyword) : w.keyword);
   const dw = D.deep.filter(d => uniqIds(d.sources).includes(e.id)).map(d => D.lang === 'en' ? d.term : (d.zh || d.term));
   const meta = e.event ? [e.event.time, e.event.ageStage].concat(e.event.people || []).filter(Boolean).join(' · ') : '';
+  // 老记忆(这次更新之前存的)没有 replyZh/replyEn,analysis 会是空字符串,直接不显示这个区块。
+  const analysis = D.lang === 'en' ? (e.replyEn || '') : (e.replyZh || '');
   return backBtn() + `<div class="detail">
     <div class="stamp">${esc(fmtDate(e.at))} · ${esc(fmtTime(e.at))}</div>
     <p class="text">${esc(e.text)}</p>
     ${meta ? `<div class="meta">${esc(meta)}</div>` : ''}
+    ${analysis ? `<div class="sec"><div class="lab">${esc(t().analysisLabel)}</div>
+      <p class="text">${esc(analysis)}</p></div>` : ''}
     ${sw.length ? `<div class="sec"><div class="lab">${esc(t().surfaceLabel)}</div>
       <div class="chips s">${sw.map(k => `<span>${esc(k)}</span>`).join('')}</div></div>` : ''}
     ${dw.length ? `<div class="sec"><div class="lab">${esc(t().deepLabel)}</div>
@@ -900,6 +979,8 @@ function bind(){
     else if(act === 'mic'){ toggleMic(); }
     else if(act === 'list'){ openList(null, false); }
     else if(act === 'open'){ push({view:'memory', id:el.dataset.id, filter:frame().filter, dark:frame().dark}); }
+    else if(act === 'del'){ deleteEntry(el.dataset.id); }
+    else if(act === 'undo'){ undoDelete(); }
     else if(act === 'askwipe'){ confirmReset = true; render(); }
     else if(act === 'nowipe'){ confirmReset = false; render(); }
     else if(act === 'wipe'){
