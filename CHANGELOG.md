@@ -19,6 +19,11 @@ This is a single-file project without strict semantic versioning; entries are re
 - A "not a medical device" bullet in the README disclaimer, and a matching line in the app's own Settings → Boundaries list.
 - Reframed the deep-map tagline from "a more clinical lens" to "a descriptive lens borrowed from psychology vocabulary — not a clinical assessment," and added an explicit "what this is / isn't" line right under the README's opening tagline, to keep the project's own claims from reading as a medical or diagnostic product.
 
+### Changed
+- The first-launch card is now always bilingual — English on top, Chinese below with a divider — regardless of the app's current UI language, instead of only showing whichever language was active.
+- README opening tagline expanded: "One HTML file. Minimal by design. Made for fun and personal journaling — if it happens to help, great, but it is absolutely not a professional diagnosis."
+- The "Deeper psychological constructs" feature bullet now reads "Deeper psychological constructs, for reference," to underline that it's a reference, not a finding.
+
 ## 2026-08-08
 
 ### Changed

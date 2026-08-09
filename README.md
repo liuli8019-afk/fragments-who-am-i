@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.zh.md)
 
-One HTML file. Minimal by design.
+One HTML file. Minimal by design. Made for fun and personal journaling — if it happens to help, great, but it is absolutely not a professional diagnosis.
 
 **What this is:** a tool for organizing personal narratives — turning scattered memories into two word clouds. **What this isn't:** a psychological test, a diagnosis, or a medical device.
 
@@ -23,7 +23,7 @@ An exploration tool that uses AI to analyze fragments of your life and reconstru
 
 Record whatever you happen to remember, and AI turns each piece into:
 - Plain, everyday personality keywords
-- Deeper psychological constructs
+- Deeper psychological constructs, for reference
 
 As memories accumulate, a truer picture of yourself gradually comes into view.
 
