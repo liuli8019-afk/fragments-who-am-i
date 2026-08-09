@@ -130,8 +130,8 @@ Fragments/
 ### 从源代码运行
 
 ```bash
-git clone https://github.com/liuli8019-afk/remember-me-1.2.git
-cd remember-me-1.2
+git clone https://github.com/liuli8019-afk/fragments-who-am-i.git
+cd fragments-who-am-i
 # 不需要 npm install，直接打开即可
 open index.html          # macOS
 # 或者起一个静态文件服务器（可选，纯本地打开也完全够用）

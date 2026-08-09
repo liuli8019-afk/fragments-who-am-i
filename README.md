@@ -130,8 +130,8 @@ You can export all your data as JSON from the settings page; if you switch devic
 ### Running from source
 
 ```bash
-git clone https://github.com/liuli8019-afk/remember-me-1.2.git
-cd remember-me-1.2
+git clone https://github.com/liuli8019-afk/fragments-who-am-i.git
+cd fragments-who-am-i
 # No npm install needed — just open it
 open index.html          # macOS
 # Or serve it statically (optional; opening it locally is already enough)
