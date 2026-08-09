@@ -1,42 +1,42 @@
-# 隐私说明
+# Privacy Notes
 
-[English](PRIVACY.en.md) | **简体中文**
+**English** | [简体中文](PRIVACY.zh.md)
 
-Fragments — Who Am I? 只有一个文件（`index.html`），没有后端、没有账号系统、没有我们自己运营的服务器。这份说明解释你的数据具体去了哪里。
+Fragments — Who Am I? is a single file (`index.html`). There's no backend, no account system, no server we run ourselves. This document explains exactly where your data goes.
 
-## 数据存在哪
+## Where your data lives
 
-- 你写下的每一条记忆、AI 分析出的浅层词 / 深层构念、以及你在设置页填的接口配置，全部存在**这台设备、这个浏览器**的 `localStorage` 里。
-- 没有账号、没有登录、没有云端同步——关掉浏览器、清空 `localStorage`，或者换一台设备，数据就不在了。想搬家，用设置页里的**导出 JSON**，到新设备上**导入 JSON**。
-- 我们（项目作者）拿不到你的任何数据。没有服务器在收集，也没有埋点、统计、分析脚本。
+- Every memory you write, the surface words / deep constructs AI extracts from them, and the connection settings you fill in on the settings page — all of it lives in `localStorage`, on **this device, in this browser**.
+- No account, no login, no cloud sync — close the browser, clear `localStorage`, or switch devices, and the data is gone. To move it, use **Export JSON** on the settings page, then **Import JSON** on the new device.
+- We (the project's author) have no access to any of your data. No server is collecting it, and there's no tracking, analytics, or telemetry script.
 
-## AI 分析时数据去了哪
+## Where your data goes during AI analysis
 
-提交一条记忆时，这段文字会被组装成一段提示词，**由你的浏览器直接发送到你在设置页里选定的那个模型服务商**（比如 Anthropic、OpenAI、Google，或者你自己本地跑的 Ollama）。
+When you submit a memory, that text is assembled into a prompt and **sent directly from your browser** to whichever model provider you selected in settings (e.g. Anthropic, OpenAI, Google, or a local Ollama instance you're running).
 
-- 这个请求不经过我们的任何服务器——我们没有服务器可以经过。
-- 是否需要经过某个第三方跨域中转（CORS relay），取决于你选的服务商是否允许浏览器直连；设置页里对每个服务商都标注了。如果你自己配置了中转，那段文字会经过你的中转服务，请自己评估该服务的信任程度。
-- 选择本地模型（Ollama / LM Studio）时，文字完全不离开你的设备。
+- The request doesn't pass through any server of ours — we don't have one for it to pass through.
+- Whether it goes through a third-party CORS relay depends on whether your chosen provider allows direct browser calls; the settings page notes this for each provider. If you configure your own relay, that text passes through your relay — you're responsible for how much you trust that service.
+- Choosing a local model (Ollama / LM Studio) keeps the text on your device entirely.
 
-这一步是绕不开的：语义分析需要一个真正的大模型来做，本地浏览器做不到。选哪个服务商、要不要联网，完全由你决定。
+This step can't be avoided — semantic analysis needs an actual large language model, which a browser can't run locally. Which provider you use, and whether you go online at all, is entirely your call.
 
-## 关于 API Key
+## About your API key
 
-- Key 只保存在你这台设备浏览器的 `localStorage` 里，明文存放（这是浏览器本地存储的通用限制，不只是这个项目）。不要在公用电脑或别人能物理接触到的设备上长期保留 Key。
-- Key 不会被写进任何文件，也不会被这个项目上传到任何地方。
-- 导出的 JSON 存档里**包含**你的 Key（因为 `settings` 字段整个被导出，方便换设备时一并带走）。所以导出的存档文件本身要当敏感文件对待——不要发给别人，不要传到公开的地方，也不要提交进代码仓库。
-- 仓库里发布的 `index.html` 本身不包含任何 Key；`config.example.js` 也只是配置项的说明文档，同样不含真实 Key。
+- The key is stored only in this device's browser `localStorage`, in plain text (a general limitation of browser local storage, not specific to this project). Don't leave a key sitting on a shared or physically accessible computer.
+- The key is never written into any file, and never uploaded anywhere by this project.
+- An exported JSON archive **includes** your key (the whole `settings` object is exported, so switching devices carries everything over in one go). Treat exported archive files as sensitive — don't send them to anyone, don't post them anywhere public, and don't commit them to a repository.
+- The `index.html` published in this repository doesn't contain any key. Neither does `config.example.js` — it's a reference document, not a real config.
 
-## 为什么开源
+## Why open source
 
-「你的数据不会被上传」这句话，闭源的时候没有任何办法验证。开源、而且是单个文件，是唯一能让人自己读完代码去核实的方式。
+"We don't upload your data" is a claim with no way to verify when the source is closed. Open source — and being a single file — is the only way anyone can actually check for themselves.
 
-## 你能做的
+## What you can do
 
-- 想完全离线：配置本地 Ollama 或 LM Studio，全程不联网。
-- 想清空所有痕迹：设置页有「清空全部数据」，会清掉记忆和词云，但保留接口配置（避免清空后还要重新配置一遍）；接口配置本身也可以单独覆盖或清空。
-- 想核实代码在做什么：`index.html` 就是全部逻辑，没有构建产物、没有压缩混淆，直接搜索关键词（比如 `fetch(`、`localStorage`）就能看到数据实际流向哪里。
+- Want to stay fully offline: configure a local Ollama or LM Studio and never go online.
+- Want to erase everything: the settings page has "Erase everything," which clears memories and word clouds but keeps your connection settings (so you don't have to reconfigure a provider after wiping); the connection settings themselves can also be overwritten or cleared separately.
+- Want to verify what the code does: `index.html` is the entire logic, with no build artifact, no minification or obfuscation — search for keywords like `fetch(` or `localStorage` and you can see exactly where data flows.
 
-## 免责声明
+## Disclaimer
 
-本项目不对你选择的第三方 AI 服务商、跨域中转服务的隐私政策和数据处理方式负责——那是你与该服务商之间的关系，请自行阅读对方的服务条款。
+This project is not responsible for the privacy policy or data handling of whatever third-party AI provider or CORS relay you choose to use — that's between you and that provider. Please read their terms yourself.

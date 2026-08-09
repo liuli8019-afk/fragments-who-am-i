@@ -1,12 +1,14 @@
 # Fragments — Who Am I?
 
-[English](README.en.md) | **简体中文**
+**English** | [简体中文](README.zh.md)
 
-你的身份由无数碎片组成。大多数人从未拼过完整的图。
+One HTML file. Minimal by design.
 
-通过慢慢的回忆，
-把人生的每一场经历都交织起来，
-找到自己是如何被塑造的。
+Your identity is made of countless fragments. Most people never assemble the full picture.
+
+Slowly, through remembering,
+weaving every episode of your life back together,
+you find out how you were shaped.
 
 > Your memories shape who you are.
 
@@ -15,238 +17,238 @@
 ![Language](https://img.shields.io/badge/Language-JavaScript-F7DF1E)
 ![No Build](https://img.shields.io/badge/Build%20Step-None-lightgrey)
 
-一个通过 AI 分析人生记忆碎片、重构个人身份画像的探索工具。整个项目只有一个 HTML 文件，没有构建步骤，没有服务端。
+An exploration tool that uses AI to analyze fragments of your life and reconstruct a picture of your identity. The entire project is a single HTML file — no build step, no server.
 
-记录你随时想起的过去，AI 将每段经历转化为：
-- 简单直观的日常性格关键词
-- 心理学视角的深层构念
+Record whatever you happen to remember, and AI turns each piece into:
+- Plain, everyday personality keywords
+- Deeper psychological constructs
 
-通过不断积累的记忆碎片，逐渐看见真实的自己。
-
----
-
-## 🎯 核心问题
-
-大多数人活在当下，却不知道自己的 identity 是如何被过去塑造的。
-
-我们的身份由过去无数事件塑造，但由于遗忘和逃避，这些关键时刻被埋没了。结果是：我们看不到一个完整、真实的自己。
-
-传统人格测试问你「当下的你认为自己是什么」，而你的答案往往反映的是「你希望自己是什么」。
-
-Fragments 不问你任何问题，只记录你的故事，让 AI 从故事本身去提取特征。
+As memories accumulate, a truer picture of yourself gradually comes into view.
 
 ---
 
-## ✨ 核心区别
+## 🎯 The Problem
 
-| | Fragments | 传统人格测试 |
+Most people live in the present without knowing how their identity was shaped by the past.
+
+Who we are was shaped by countless past events, but forgetting and avoidance bury the key moments. The result: we can't see a complete, honest picture of ourselves.
+
+Traditional personality tests ask "what do you think you are right now" — and the answer you give usually reflects "what you wish you were," not what you actually are.
+
+Fragments doesn't ask you anything. It only records your story, and lets AI extract traits from the story itself.
+
+---
+
+## ✨ What Makes It Different
+
+| | Fragments | Traditional Personality Tests |
 |---|----------|---------|
-| 数据来源 | 你实际经历过的事 | 你认为自己会做的事 |
-| 基础 | 一手资料（生活痕迹） | 当下主观选择 |
-| 时间跨度 | 积累式、长期观察 | 静态快照 |
-| 结果倾向 | 更接近真实画像 | 更接近理想画像 |
-| 受期望值影响 | 较小 | 较大 |
+| Data source | Things that actually happened to you | Things you think you'd do |
+| Basis | Primary evidence (life traces) | Subjective choices in the moment |
+| Time span | Accumulated, long-term observation | A static snapshot |
+| Result tends toward | A more honest picture | A more idealized picture |
+| Susceptible to expectations | Less | More |
 
 ---
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 Fragments/
 │
-├── index.html              # 主程序——整个应用就是这一个文件
+├── index.html              # The app — this one file is the entire thing
 │
-├── README.md               # 项目介绍（中文，本文件）
-├── README.en.md            # 项目介绍（英文）
+├── README.md               # Project intro (English, this file)
+├── README.zh.md            # Project intro (Chinese)
 │
-├── LICENSE                  # MIT 协议
+├── LICENSE                  # MIT license
 │
-├── .gitignore               # Git 忽略文件
+├── .gitignore               # Git ignore rules
 │
-├── config.example.js        # API 配置参考（说明文档，中英双语注释，不会被自动加载）
+├── config.example.js        # API config reference (bilingual comments, not loaded at runtime)
 │
-├── PRIVACY.md                # 隐私说明（中文）
-├── PRIVACY.en.md              # 隐私说明（英文）
+├── PRIVACY.md                # Privacy notes (English)
+├── PRIVACY.zh.md              # Privacy notes (Chinese)
 │
-├── CHANGELOG.md               # 更新记录（中文）
-└── CHANGELOG.en.md             # 更新记录（英文）
+├── CHANGELOG.md               # Changelog (English)
+└── CHANGELOG.zh.md             # Changelog (Chinese)
 ```
 
-没有 `src/`、没有 `api/`、没有 `package.json`——`index.html` 就是全部代码，直接读就能看完。
+No `src/`, no `api/`, no `package.json` — `index.html` is the whole codebase, short enough to read end to end.
 
 ---
 
-## 🚀 怎么用
+## 🚀 How To Use It
 
-### 三步了解自己
+### Three steps to see yourself
 
-1. **记录** — 想起过去的经历？用文字记下来（支持中英文）
-2. **AI 分析** — 系统自动从你的真实故事中提取特征
-3. **看见自己** — 生成两个维度的完整自画像
+1. **Record** — Remembered something from the past? Write it down (Chinese and English both work).
+2. **AI analysis** — The system extracts traits from your actual story.
+3. **See yourself** — Two layers of self-portrait get built up over time.
 
-### 你会得到什么
+### What you get
 
-**📊 浅层特征图**
-一眼看清你的性格构成
-- 易懂的关键词标签：「勇敢」「谨慎」「执着」等
-- 出现频次越高，词云里字号越大，直观展示你最常出现的行为模式
+**📊 Surface trait map**
+See your personality at a glance
+- Plain keyword tags: "brave," "cautious," "persistent," and so on
+- The more often a word recurs, the larger it renders in the word cloud, showing your most common patterns at a glance
 
-**🧠 深层心理图**
-基于心理学的专业视角
-- 依恋理论、创伤心理学、认知行为理论等领域的描述性构念
-- 帮助你理解自己更深层的动机和模式；积累到一定记忆量后，长按词云还能解锁「值得关注的方向」标签（明确标注非诊断）
-
----
-
-## 📋 功能清单
-
-- ✅ 文字输入（中英文双语支持，UI 默认英文，可一键切换中文）
-- ✅ 实时 AI 分析
-- ✅ 双维度可视化（浅层特征 + 深层构念）
-- ✅ 记忆溯源（点击词云词条查看它来自哪几条记忆）
-- ✅ 记忆清单与详情查看
-- ✅ 数据导出 / 导入（JSON 格式）
-- ✅ 中英双语界面，浅层词按中文合并、深层构念按英文合并，切语言不会拆成两条
-- ✅ 语音输入（浏览器支持 Web Speech API 时可用）
-- ✅ 危机信号识别：检测到自伤 / 自杀等信号时跳过分析，只显示关心文案
+**🧠 Deep psychological map**
+A more clinical lens
+- Descriptive constructs drawn from attachment theory, trauma psychology, cognitive-behavioral theory, and related fields
+- Helps you understand your deeper motivations and patterns; once you've logged enough memories, a long-press on the word cloud unlocks a row of "directions worth paying attention to" (explicitly labeled as not a diagnosis)
 
 ---
 
-## 🔧 快速开始
+## 📋 Features
 
-这是一个单文件项目，没有安装、没有构建。
+- ✅ Text input (Chinese and English both supported; UI defaults to English, one click to switch to Chinese)
+- ✅ Real-time AI analysis
+- ✅ Two-layer visualization (surface traits + deep constructs)
+- ✅ Traceability (click any word in the cloud to see which memories it came from)
+- ✅ Memory list and detail view
+- ✅ Data export / import (JSON)
+- ✅ Bilingual UI — surface words merge by their Chinese keyword, deep constructs merge by their English term, so switching languages never splits the same word into two entries
+- ✅ Voice input (where the browser supports the Web Speech API)
+- ✅ Crisis-signal detection: when self-harm / suicide signals are detected, analysis is skipped and only a caring message is shown
 
-1. 下载（或克隆仓库后取用）`index.html`
-2. 双击打开即可使用——浏览器直接把它当网页运行
-3. **长按首页标题 1.2 秒**进入隐藏的设置页，选择服务商、填入你自己的 API Key（支持 Anthropic Claude / OpenAI / Google Gemini / OpenRouter / Groq / DeepSeek / Moonshot Kimi / 智谱 GLM / 阿里通义千问 / SiliconFlow / 本地 Ollama / 本地 LM Studio / 任意自定义接口）
-4. 所有数据存储在本地浏览器（`localStorage`），不经过任何我们运营的服务器
+---
 
-可以在设置页导出你的全部数据（JSON 格式）；如果换设备或者文件丢失，同样在设置页导入回来。
+## 🔧 Quick Start
 
-### 从源代码运行
+This is a single-file project. Nothing to install, nothing to build.
+
+1. Download `index.html` (or grab it from a clone of this repo)
+2. Double-click to open it — your browser runs it directly as a web page
+3. **Press and hold the title on the home screen for 1.2 seconds** to open the hidden settings page, pick a provider, and paste in your own API key (Anthropic Claude / OpenAI / Google Gemini / OpenRouter / Groq / DeepSeek / Moonshot Kimi / Zhipu GLM / Alibaba Qwen / SiliconFlow / local Ollama / local LM Studio / any custom endpoint)
+4. All data lives in your browser's local storage (`localStorage`) — nothing passes through any server we run
+
+You can export all your data as JSON from the settings page; if you switch devices or lose the file, import it back the same way.
+
+### Running from source
 
 ```bash
 git clone https://github.com/liuli8019-afk/remember-me-1.2.git
 cd remember-me-1.2
-# 不需要 npm install，直接打开即可
+# No npm install needed — just open it
 open index.html          # macOS
-# 或者起一个静态文件服务器（可选，纯本地打开也完全够用）
+# Or serve it statically (optional; opening it locally is already enough)
 python3 -m http.server
 ```
 
-想部署到线上也可以：GitHub Pages、Vercel（静态托管模式）、Netlify、或任意能托管静态文件的地方，把 `index.html` 发布出去就行，不涉及任何构建命令。
+Deploying it publicly works the same way: GitHub Pages, Vercel (static hosting), Netlify, or any static file host — just publish `index.html`, no build command involved.
 
 ---
 
-## 🔐 隐私与数据
+## 🔐 Privacy & Data
 
-- 无账号、无登录 — 完全匿名使用
-- 本地存储 — 所有记忆数据保存在你的浏览器本地（`localStorage`）
-- 无埋点、无追踪 — 我们不收集任何使用数据，因为没有服务器可以收集
-- 可随时导出 — 支持 JSON 格式导出你的全部数据
+- No account, no login — fully anonymous
+- Local storage — all memory data lives in your browser's `localStorage`
+- No tracking, no analytics — we don't collect any usage data, because there's no server to collect it on
+- Export anytime — your full data set can be exported as JSON
 
-记忆内容会发送至你在设置页选定的 AI 服务商（如 Anthropic、OpenAI、Google）进行分析——这是绕不开的，本地浏览器做不了这类复杂的语义分析。请求由**你的浏览器直接**发出，不经过任何我们运营的服务器。如果你想完全离线，可以配置本地 Ollama 或 LM Studio。
+Memory content is sent to whichever AI provider you configure in settings (e.g. Anthropic, OpenAI, Google) for analysis — that step is unavoidable, since this kind of semantic analysis can't be done locally in the browser. The request is sent **directly from your browser**, never through a server we operate. If you want to stay fully offline, configure a local Ollama or LM Studio instead.
 
-完整说明见 [PRIVACY.md](PRIVACY.md)（[English](PRIVACY.en.md)）。
+Full details in [PRIVACY.md](PRIVACY.md) ([中文](PRIVACY.zh.md)).
 
-### 为什么开源
+### Why open source
 
-这是一个装着私人记忆的工具。「我们不上传你的数据」这句话在闭源时没有任何验证途径。开源是唯一能让人核实的方式——单文件版尤其适合，一个文件，谁都能读完代码。
-
----
-
-## 🎯 适合谁用
-
-### ✅ 这个工具最适合
-
-- 正在做心理咨询，想把散落的记忆整理成能讨论的材料
-- 写作者、日记爱好者、长期做自我梳理的人
-- 想理解自己的行为模式来源的人
-- 追求真实自我认知而非理想自我评估的人
-
-### ⚠️ 这个工具不适合
-
-- 作为医学诊断或心理治疗工具（它不是）
-- 寻求快速、简单的人格标签的人
-- 不愿意深入反思自己的人
+This is a tool that holds private memories. "We don't upload your data" is a claim with no way to verify if the source is closed. Open source is the only way anyone can actually check — and being a single file makes it especially easy: it's one file, anyone can read the whole thing.
 
 ---
 
-## 🛠 技术栈
+## 🎯 Who It's For
 
-- **前端**：原生 JavaScript，无框架、无构建步骤，整个应用是一个 `.html` 文件
-- **语音输入**：Web Speech API（浏览器原生，支持的浏览器才会显示麦克风按钮）
-- **AI 分析**：由你在设置页配置——Anthropic Claude / OpenAI / Google Gemini / OpenRouter / Groq / DeepSeek / Moonshot Kimi / 智谱 GLM / 阿里通义千问 / SiliconFlow / 本地 Ollama / 本地 LM Studio / 任意 OpenAI 兼容或 Anthropic 兼容接口
-- **数据存储**：浏览器 `localStorage`
-- **部署**：可选，GitHub Pages / Vercel（静态）/ Netlify（静态）/ 任意静态文件托管，或者干脆双击打开本地文件，都能用
+### ✅ Best suited for
 
----
+- People in therapy who want to turn scattered memories into material they can actually discuss
+- Writers, journal-keepers, and anyone doing long-term self-reflection
+- People trying to understand where their behavioral patterns come from
+- Anyone who wants an honest self-picture rather than an idealized self-assessment
 
-## 📝 配置
+### ⚠️ Not suited for
 
-### API Key 配置
-
-长按首页标题（默认英文界面显示 "Who am I?"，切到中文后是「我是谁?」）1.2 秒，进入隐藏的设置页，在这里选服务商、填 Key、选模型。
-
-`config.example.js` 是这些配置项的参考文档（服务商列表、字段说明），**不会**被 `index.html` 自动加载——它只是给你在填设置页之前先看一眼用的，不要把真实 Key 写进这个文件再提交。
-
-支持的服务商中，Anthropic / Gemini / OpenRouter 通常允许浏览器直接调用；OpenAI / Groq / SiliconFlow 不一定，失败时需要配置跨域中转；DeepSeek / Moonshot Kimi / 智谱 / 通义 的官方接口不允许浏览器直连，必须配置跨域中转，设置页里对每个服务商都有对应提示。
+- Medical diagnosis or psychological treatment (it is neither)
+- People looking for quick, simple personality labels
+- People unwilling to reflect deeply on themselves
 
 ---
 
-## 🐛 已知问题
+## 🛠 Tech Stack
 
-- [ ] 深层构念词云可能呈现偏消极的倾向（心理学构念本身覆盖的负面模式词汇更丰富）
-- [ ] 跨浏览器 / 跨设备的数据自动同步暂不支持，需要手动导出 / 导入
-- [ ] 语音输入依赖浏览器对 Web Speech API 的支持程度，部分浏览器 / 系统不可用
-
-这些是产品层面的优化方向，非阻塞性 bug。
+- **Frontend**: Vanilla JavaScript, no framework, no build step — the whole app is one `.html` file
+- **Voice input**: Web Speech API (browser-native; the mic button only appears where it's supported)
+- **AI analysis**: Configured by you in settings — Anthropic Claude / OpenAI / Google Gemini / OpenRouter / Groq / DeepSeek / Moonshot Kimi / Zhipu GLM / Alibaba Qwen / SiliconFlow / local Ollama / local LM Studio / any OpenAI-compatible or Anthropic-compatible endpoint
+- **Data storage**: Browser `localStorage`
+- **Deployment**: Optional — GitHub Pages / Vercel (static) / Netlify (static) / any static file host, or just double-click the local file
 
 ---
 
-## 🤝 贡献
+## 📝 Configuration
 
-欢迎提交 Issue 和 Pull Request！这是一个单文件项目，改动前建议先在 Issue 里说一声想法，避免和别人改到同一块逻辑上。
+### Setting your API key
+
+Press and hold the home screen title (shows "Who am I?" in English by default, "我是谁?" once switched to Chinese) for 1.2 seconds to open the hidden settings page, where you pick a provider, paste your key, and choose a model.
+
+`config.example.js` is a reference for those settings (provider list, field descriptions) — it is **not** loaded by `index.html` at runtime; it's just there for you to skim before filling out the settings page. Don't put a real key in that file and commit it.
+
+Among the supported providers, Anthropic / Gemini / OpenRouter usually allow direct browser calls; OpenAI / Groq / SiliconFlow may or may not, and need a CORS relay configured if they fail; DeepSeek / Moonshot Kimi / Zhipu / Qwen's official endpoints don't allow direct browser calls at all and require a CORS relay — the settings page shows a note for each provider.
+
+---
+
+## 🐛 Known Issues
+
+- [ ] The deep-construct word cloud can skew toward negative-sounding terms (the psychological-construct vocabulary itself has richer coverage of negative patterns)
+- [ ] Automatic sync across browsers/devices isn't supported yet — use manual export/import
+- [ ] Voice input depends on how well the browser supports the Web Speech API; unavailable in some browsers/systems
+
+These are product-level improvement areas, not blocking bugs.
+
+---
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome! Since this is a single-file project, it helps to drop your idea in an issue first, so two people don't end up reworking the same piece of logic.
 
 ---
 
 ## 📄 License
 
-MIT License - 详见 [LICENSE](LICENSE)
+MIT License — see [LICENSE](LICENSE)
 
-这意味着你可以自由地使用、修改和分发本项目，只需保留原始许可证声明。
-
----
-
-## 📜 更新记录
-
-详见 [CHANGELOG.md](CHANGELOG.md)（[English](CHANGELOG.en.md)）。
+You're free to use, modify, and distribute this project, as long as you keep the original license notice.
 
 ---
 
-## 🙏 鸣谢
+## 📜 Changelog
 
-- 感谢开源社区的支持
-
----
-
-## ⚠️ 免责声明
-
-需使用你自己的 API 进行 AI 调用分析，所有产生的费用与本项目及开发者无关。
-
-- AI 生成的内容不构成专业心理诊断、医学判断或治疗建议。
-- 分析结果仅代表基于当前输入信息产生的可能性解释，并不代表对个人心理状态的确定结论。
-- 人的性格和心理结构非常复杂，单一事件或有限的记忆无法完整定义一个人。
-- 如果你正在经历持续且严重的心理困扰，建议寻求专业心理咨询师或医疗人员的帮助。
-
-希望它能帮助你：
-- 重新理解过去的经历
-- 发现隐藏的行为模式
-- 看见那些曾经被忽略的自己
-
-你的故事，由你定义。
-AI 只是帮助你重新观察它。
+See [CHANGELOG.md](CHANGELOG.md) ([中文](CHANGELOG.zh.md)).
 
 ---
 
-*Fragments — Who Am I? — 通过 AI 分析人生记忆碎片，探索塑造自己的身份结构。*
+## 🙏 Acknowledgements
+
+- Thanks to the open source community
+
+---
+
+## ⚠️ Disclaimer
+
+You must use your own API for AI analysis; any costs incurred are yours, not the project's or the developer's.
+
+- AI-generated content does not constitute a professional psychological diagnosis, medical judgment, or treatment recommendation.
+- The analysis reflects a possible interpretation based on your input, not a definitive conclusion about your psychological state.
+- A person's character and psychology are complex; a single event or a limited set of memories can't fully define who someone is.
+- If you're dealing with ongoing, serious psychological distress, please seek help from a qualified therapist or medical professional.
+
+Hopefully this can help you:
+- Re-understand past experiences
+- Notice hidden behavioral patterns
+- See the parts of yourself that used to go unnoticed
+
+Your story is yours to define.
+AI is just here to help you look at it again.
+
+---
+
+*Fragments — Who Am I? — using AI to analyze fragments of a life and explore the structure that shaped it.*
