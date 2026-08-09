@@ -1,5 +1,7 @@
 # Fragments — Who Am I?
 
+[English](README.en.md) | **简体中文**
+
 你的身份由无数碎片组成。大多数人从未拼过完整的图。
 
 通过慢慢的回忆，
@@ -54,17 +56,20 @@ Fragments/
 │
 ├── index.html              # 主程序——整个应用就是这一个文件
 │
-├── README.md               # 项目介绍（本文件）
+├── README.md               # 项目介绍（中文，本文件）
+├── README.en.md            # 项目介绍（英文）
 │
 ├── LICENSE                  # MIT 协议
 │
 ├── .gitignore               # Git 忽略文件
 │
-├── config.example.js        # API 配置参考（说明文档，不会被自动加载）
+├── config.example.js        # API 配置参考（说明文档，中英双语注释，不会被自动加载）
 │
-├── PRIVACY.md                # 隐私说明
+├── PRIVACY.md                # 隐私说明（中文）
+├── PRIVACY.en.md              # 隐私说明（英文）
 │
-└── CHANGELOG.md              # 更新记录
+├── CHANGELOG.md               # 更新记录（中文）
+└── CHANGELOG.en.md             # 更新记录（英文）
 ```
 
 没有 `src/`、没有 `api/`、没有 `package.json`——`index.html` 就是全部代码，直接读就能看完。
@@ -142,7 +147,7 @@ python3 -m http.server
 
 记忆内容会发送至你在设置页选定的 AI 服务商（如 Anthropic、OpenAI、Google）进行分析——这是绕不开的，本地浏览器做不了这类复杂的语义分析。请求由**你的浏览器直接**发出，不经过任何我们运营的服务器。如果你想完全离线，可以配置本地 Ollama 或 LM Studio。
 
-完整说明见 [PRIVACY.md](PRIVACY.md)。
+完整说明见 [PRIVACY.md](PRIVACY.md)（[English](PRIVACY.en.md)）。
 
 ### 为什么开源
 
@@ -215,7 +220,7 @@ MIT License - 详见 [LICENSE](LICENSE)
 
 ## 📜 更新记录
 
-详见 [CHANGELOG.md](CHANGELOG.md)。
+详见 [CHANGELOG.md](CHANGELOG.md)（[English](CHANGELOG.en.md)）。
 
 ---
 

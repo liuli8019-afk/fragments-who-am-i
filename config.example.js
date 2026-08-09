@@ -1,7 +1,9 @@
 /**
  * config.example.js — API 配置参考,不是会被自动加载的文件
+ *                     API config reference — NOT loaded automatically
  * =========================================================
  *
+ * [中文]
  * 重要:index.html 是一个零依赖的单文件应用,不会在运行时读取、
  * 加载或 import 这个文件。它只是把「设置页里能填的字段」以及
  * 「当前支持哪些服务商、各自的默认地址/模型」写成一份可读的参考,
@@ -15,33 +17,59 @@
  * git 追踪、会被发布,任何人拿到仓库都能看到。如果你想在本地写一份
  * 带着真实 Key 的备份供自己参考,请另存为不会被提交的文件名
  * (比如 config.local.js),或者直接用设置页的「导出 JSON」功能。
+ *
+ * [English]
+ * Important: index.html is a dependency-free single-file app. It never
+ * reads, loads, or imports this file at runtime. This is just a readable
+ * reference for "which fields the settings page accepts" and "which
+ * providers are built in, with their default base URL / model" — useful
+ * to skim before you fill out the settings page, or to cross-check an
+ * exported JSON archive.
+ *
+ * The only two things that actually take effect are:
+ *   1. Press and hold the home screen title for 1.2s → settings page →
+ *      fill in and save by hand (stored in browser localStorage)
+ *   2. "Import JSON" on the settings page, restoring a previously
+ *      exported archive (including its settings field) wholesale
+ *
+ * Do not put a real API key in this file and commit it — this file is
+ * tracked by git and gets published, so anyone with the repo can see it.
+ * If you want a local backup with a real key for your own reference,
+ * save it under a filename that isn't committed (e.g. config.local.js),
+ * or just use the settings page's "Export JSON" feature.
  */
 
-// 设置页保存后,实际写入 localStorage 的结构长这样:
+// [中文] 设置页保存后,实际写入 localStorage 的结构长这样:
+// [English] Once saved from the settings page, this is the shape actually
+// written to localStorage:
 const exampleSettings = {
-  provider: "anthropic",      // 见下面 PROVIDERS 列表里的 id
-  protocol: "anthropic",      // "anthropic" | "gemini" | "openai"(OpenAI 兼容)
-  apiKey: "",                 // 不要在这个文件里填真实值
+  provider: "anthropic",      // 见下面 PROVIDERS 列表里的 id / see the id in PROVIDERS_REFERENCE below
+  protocol: "anthropic",      // "anthropic" | "gemini" | "openai"(OpenAI 兼容 / OpenAI-compatible)
+  apiKey: "",                 // 不要在这个文件里填真实值 / never put a real value in this file
   baseUrl: "https://api.anthropic.com/v1",
   model: "claude-sonnet-4-5",
-  temperature: 0.2,           // 0-1,越低越保守
+  temperature: 0.2,           // 0-1,越低越保守 / 0-1, lower is more conservative
   proxy: ""                   // 跨域中转地址,官方接口不允许浏览器直连时才需要
+                               // CORS relay URL, only needed when the official endpoint blocks direct browser calls
 };
 
-// 当前设置页内置的服务商列表(节选自 index.html 里的 PROVIDERS 常量,
+// [中文] 当前设置页内置的服务商列表(节选自 index.html 里的 PROVIDERS 常量,
 // 完整定义、每个服务商是否需要跨域中转,以准确的 index.html 为准):
+// [English] The provider list built into the settings page (excerpted from
+// the PROVIDERS constant in index.html — treat index.html as the source of
+// truth for the exact definitions and CORS requirements):
 const PROVIDERS_REFERENCE = [
-  { id: "anthropic",   protocol: "anthropic", baseUrl: "https://api.anthropic.com/v1",                          cors: "浏览器可直连" },
-  { id: "gemini",      protocol: "gemini",    baseUrl: "https://generativelanguage.googleapis.com/v1beta",      cors: "浏览器可直连" },
-  { id: "openrouter",  protocol: "openai",    baseUrl: "https://openrouter.ai/api/v1",                          cors: "浏览器可直连" },
-  { id: "openai",      protocol: "openai",    baseUrl: "https://api.openai.com/v1",                             cors: "不一定,失败就填中转" },
-  { id: "groq",        protocol: "openai",    baseUrl: "https://api.groq.com/openai/v1",                        cors: "不一定,失败就填中转" },
-  { id: "siliconflow", protocol: "openai",    baseUrl: "https://api.siliconflow.cn/v1",                         cors: "不一定,失败就填中转" },
-  { id: "deepseek",    protocol: "openai",    baseUrl: "https://api.deepseek.com/v1",                           cors: "必须填中转" },
-  { id: "moonshot",    protocol: "openai",    baseUrl: "https://api.moonshot.cn/v1",                            cors: "必须填中转" },
-  { id: "zhipu",       protocol: "openai",    baseUrl: "https://open.bigmodel.cn/api/paas/v4",                  cors: "必须填中转" },
-  { id: "qwen",        protocol: "openai",    baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",     cors: "必须填中转" },
-  { id: "ollama",      protocol: "openai",    baseUrl: "http://localhost:11434/v1",                             cors: "本地,需 OLLAMA_ORIGINS=*" },
-  { id: "lmstudio",    protocol: "openai",    baseUrl: "http://localhost:1234/v1",                              cors: "本地,需在设置里开 CORS" },
-  { id: "custom",      protocol: "openai",    baseUrl: "",                                                      cors: "视你的中转而定" }
+  { id: "anthropic",   protocol: "anthropic", baseUrl: "https://api.anthropic.com/v1",                          cors: "浏览器可直连 / direct in browser" },
+  { id: "gemini",      protocol: "gemini",    baseUrl: "https://generativelanguage.googleapis.com/v1beta",      cors: "浏览器可直连 / direct in browser" },
+  { id: "openrouter",  protocol: "openai",    baseUrl: "https://openrouter.ai/api/v1",                          cors: "浏览器可直连 / direct in browser" },
+  { id: "openai",      protocol: "openai",    baseUrl: "https://api.openai.com/v1",                             cors: "不一定,失败就填中转 / maybe — add a relay if it fails" },
+  { id: "groq",        protocol: "openai",    baseUrl: "https://api.groq.com/openai/v1",                        cors: "不一定,失败就填中转 / maybe — add a relay if it fails" },
+  { id: "siliconflow", protocol: "openai",    baseUrl: "https://api.siliconflow.cn/v1",                         cors: "不一定,失败就填中转 / maybe — add a relay if it fails" },
+  { id: "deepseek",    protocol: "openai",    baseUrl: "https://api.deepseek.com/v1",                           cors: "必须填中转 / relay required" },
+  { id: "moonshot",    protocol: "openai",    baseUrl: "https://api.moonshot.cn/v1",                            cors: "必须填中转 / relay required" },
+  { id: "zhipu",       protocol: "openai",    baseUrl: "https://open.bigmodel.cn/api/paas/v4",                  cors: "必须填中转 / relay required" },
+  { id: "qwen",        protocol: "openai",    baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",     cors: "必须填中转 / relay required" },
+  { id: "ollama",      protocol: "openai",    baseUrl: "http://localhost:11434/v1",                             cors: "本地,需 OLLAMA_ORIGINS=* / local — start with OLLAMA_ORIGINS=*" },
+  { id: "lmstudio",    protocol: "openai",    baseUrl: "http://localhost:1234/v1",                              cors: "本地,需在设置里开 CORS / local — enable CORS in its settings" },
+  { id: "custom",      protocol: "openai",    baseUrl: "",                                                      cors: "视你的中转而定 / depends on your relay" }
 ];

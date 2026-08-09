@@ -1,5 +1,7 @@
 # 更新日志
 
+[English](CHANGELOG.en.md) | **简体中文**
+
 这是一个单文件项目，没有严格的语义化版本号，按变更时间记录。格式大致参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
 ## 2026-08-09
