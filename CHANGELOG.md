@@ -13,6 +13,12 @@ This is a single-file project without strict semantic versioning; entries are re
 - Swapped which language each doc defaults to: `README.md` / `PRIVACY.md` / `CHANGELOG.md` are now the English versions (so the repo's homepage on GitHub renders in English by default), with the Chinese translation living at the `.zh.md` suffix.
 - Added an opening tagline — "One HTML file. Minimal by design." — as the first line of the README, right under the title.
 
+### Added
+- A one-time "Before you start" card on first launch: the generated words are a pattern description and not a diagnosis, all data stays on this device, and if you've been struggling lately, please talk to someone you trust. Shown once per browser (tracked via a `seenIntro` flag), never again after it's dismissed.
+- A permanently visible, low-contrast note under the deep-construct word cloud, repeating the same "not a diagnosis / local data / talk to someone" message so it's not gated behind the 8-memory reveal easter egg.
+- A "not a medical device" bullet in the README disclaimer, and a matching line in the app's own Settings → Boundaries list.
+- Reframed the deep-map tagline from "a more clinical lens" to "a descriptive lens borrowed from psychology vocabulary — not a clinical assessment," and added an explicit "what this is / isn't" line right under the README's opening tagline, to keep the project's own claims from reading as a medical or diagnostic product.
+
 ## 2026-08-08
 
 ### Changed

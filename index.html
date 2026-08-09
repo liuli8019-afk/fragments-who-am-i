@@ -128,6 +128,19 @@ body.dark .detail .sec{border-top-color:rgba(255,255,255,.12)}
 .rules{font-size:12px;line-height:2;color:var(--graphite);padding-left:18px;margin:0}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:12px;color:var(--graphite);margin:0}
 .kv dt{color:var(--dust)}
+
+.veil{position:fixed;inset:0;background:rgba(23,22,26,.55);display:flex;align-items:center;justify-content:center;
+  z-index:100;padding:24px}
+.veil .box{max-width:420px;width:100%;background:var(--paper);border-radius:16px;padding:28px 24px;
+  box-shadow:0 20px 60px rgba(0,0,0,.28)}
+.veil .box h2{font-family:var(--serif);font-size:18px;letter-spacing:.03em;margin:0 0 14px;color:var(--ink)}
+.veil .box p{font-size:12.5px;line-height:1.8;color:var(--graphite);margin:0 0 12px}
+.veil .box button{width:100%;margin-top:6px;background:var(--ink);color:var(--paper);border:0;border-radius:8px;
+  padding:12px;font-size:13px;cursor:pointer;font-family:var(--sans)}
+
+.deepfoot{margin-top:24px;font-size:11px;line-height:1.7;color:var(--dust);text-align:center;max-width:420px;
+  margin-left:auto;margin-right:auto}
+body.dark .deepfoot{color:rgba(255,255,255,.4)}
 </style>
 </head>
 <body>
@@ -179,7 +192,7 @@ const CORS_NOTE = {
 };
 
 const DEFAULTS = {
-  entries: [], surface: [], deep: [], domains: [], lang: 'en',
+  entries: [], surface: [], deep: [], domains: [], lang: 'en', seenIntro: false,
   settings: {provider:'anthropic', protocol:'anthropic', apiKey:'',
     baseUrl:'https://api.anthropic.com/v1', model:'claude-sonnet-4-5', temperature:0.2, proxy:''}
 };
@@ -242,6 +255,14 @@ const T = {
     errSave:'这次没能存进档案,内容还在屏幕上。',
     noConfig:'还没有配置接口。长按标题可以进入设置。',
     crisis:'这里只做记录和整理,处理不了此刻的重量。如果你正处在危险中,请联系当地紧急服务,或身边任何一个你还愿意打电话的人。',
+    introTitle:'开始之前',
+    introBody:[
+      '这里生成的词和标签,是基于你写下的内容做的模式描述——不是诊断,也不代表你有任何疾病。',
+      '所有数据只保存在这台设备的浏览器里,不会被上传、不会被我们看到。',
+      '如果你最近很难受,这个工具能帮你整理,但接不住那份重量——建议找一个信任的人聊聊,或寻求专业支持。'
+    ],
+    introOk:'我知道了,继续',
+    deepFooter:'以上是基于你写下的内容做的模式描述,不是诊断。数据只留在这台设备上。如果最近很难受,建议找信任的人聊聊。',
     locale:'zh-CN', speech:'zh-CN', other:'EN',
     setConn:'AI 接口', setProvider:'服务商', setProto:'接口协议',
     setBase:'接口地址(Base URL,不用带 /chat/completions)', setModel:'模型',
@@ -259,7 +280,8 @@ const T = {
     rules:['只整理你说过的内容,不补写、不推测你没讲的经历。',
            '浅层词描述故事里当时的那个人,好听的和不好听的都给。',
            '深层构念是描述性的心理学概念,不是疾病名称。',
-           '方向那一排是模式描述,不是诊断,也不代表你有任何疾病。'],
+           '方向那一排是模式描述,不是诊断,也不代表你有任何疾病。',
+           '这不是医疗器械,不提供诊断、评估或治疗建议。'],
     stat:e=>`记忆 ${e.entries.length} · 浅层词 ${e.surface.length} · 深层构念 ${e.deep.length}`
   },
   en: {
@@ -275,6 +297,14 @@ const T = {
     errSave:"That didn't save to your archive. It's still on screen.",
     noConfig:'No API configured yet. Press and hold the title to open settings.',
     crisis:"This place only records and sorts. It can't carry what you're holding right now. If you're in danger, contact your local emergency services, or anyone you'd still be willing to call.",
+    introTitle:'Before you start',
+    introBody:[
+      "The words and labels generated here are pattern descriptions based on what you write — not a diagnosis, and not a claim that you have any condition.",
+      "All data stays in this browser, on this device. Nothing is uploaded, and we never see it.",
+      "If you've been having a hard time lately, this tool can help you organize your thoughts, but it can't carry that weight — please talk to someone you trust, or reach out for professional support."
+    ],
+    introOk:'I understand, continue',
+    deepFooter:"The above is a pattern description based on what you wrote, not a diagnosis. Data stays on this device only. If things have been hard lately, please talk to someone you trust.",
     locale:'en-US', speech:'en-US', other:'中',
     setConn:'AI connection', setProvider:'Provider', setProto:'Protocol',
     setBase:'Base URL (no /chat/completions)', setModel:'Model',
@@ -292,7 +322,8 @@ const T = {
     rules:['Only organises what you actually said. Nothing is inferred or filled in.',
            'Surface words describe the person in that story, flattering or not.',
            'Deep terms are descriptive psychological constructs, not illness names.',
-           'The bottom row is pattern description, not a diagnosis.'],
+           'The bottom row is pattern description, not a diagnosis.',
+           'This is not a medical device, and does not provide diagnosis, assessment, or treatment advice.'],
     stat:e=>`${e.entries.length} memories · ${e.surface.length} surface · ${e.deep.length} deep`
   }
 };
@@ -613,6 +644,25 @@ function render(){
 
 const backBtn = () => `<button class="back" data-act="back">${ICON.left} ${esc(t().back)}</button>`;
 
+/* 首次打开的一次性说明卡:模式描述不是诊断、数据只留本机、如果最近很难受建议找人聊聊。
+   独立于 #app 的 render() 循环,挂在 body 上,避免每次换页被冲掉。确认一次后不再出现。 */
+function showIntroVeil(){
+  if(D.seenIntro) return;
+  const T_ = t();
+  const veil = document.createElement('div');
+  veil.className = 'veil';
+  veil.innerHTML = `<div class="box">
+    <h2>${esc(T_.introTitle)}</h2>
+    ${T_.introBody.map(p => `<p>${esc(p)}</p>`).join('')}
+    <button type="button">${esc(T_.introOk)}</button>
+  </div>`;
+  veil.querySelector('button').onclick = () => {
+    D.seenIntro = true; save();
+    veil.remove();
+  };
+  document.body.appendChild(veil);
+}
+
 /* ------- 首页 ------- */
 function vHome(){
   const n = D.entries.length, T_ = t();
@@ -703,7 +753,7 @@ function vDeep(){
   return backBtn() + cloud(items) + ((unlocked && revealed)
     ? `<div class="reveal"><div class="lab">${esc(t().notDiagnosis)}</div><div class="row">${
         doms.map((d, i) => `<span style="color:${shade(i, doms.length)}">${esc(D.lang === 'en' ? (DOMAINS[d.name] || d.name) : d.name)}</span>`).join('')
-      }</div></div>` : '');
+      }</div></div>` : '') + `<p class="deepfoot">${esc(t().deepFooter)}</p>`;
 }
 
 /* ------- 记忆清单 / 详情 ------- */
@@ -973,6 +1023,7 @@ document.head.appendChild(style);
 migrateLangFields();
 render();
 if(configured()) ensureTranslations();
+showIntroVeil();
 
 </script>
 </body>

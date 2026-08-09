@@ -4,6 +4,8 @@
 
 One HTML file. Minimal by design.
 
+**What this is:** a tool for organizing personal narratives — turning scattered memories into two word clouds. **What this isn't:** a psychological test, a diagnosis, or a medical device.
+
 Your identity is made of countless fragments. Most people never assemble the full picture.
 
 Slowly, through remembering,
@@ -94,7 +96,7 @@ See your personality at a glance
 - The more often a word recurs, the larger it renders in the word cloud, showing your most common patterns at a glance
 
 **🧠 Deep psychological map**
-A more clinical lens
+A descriptive lens borrowed from psychology vocabulary — not a clinical assessment
 - Descriptive constructs drawn from attachment theory, trauma psychology, cognitive-behavioral theory, and related fields
 - Helps you understand your deeper motivations and patterns; once you've logged enough memories, a long-press on the word cloud unlocks a row of "directions worth paying attention to" (explicitly labeled as not a diagnosis)
 
@@ -236,6 +238,7 @@ See [CHANGELOG.md](CHANGELOG.md) ([中文](CHANGELOG.zh.md)).
 
 You must use your own API for AI analysis; any costs incurred are yours, not the project's or the developer's.
 
+- **This project is not a medical device.** It does not provide, and is not intended to provide, medical diagnosis, psychological assessment, or treatment of any kind, in any jurisdiction.
 - AI-generated content does not constitute a professional psychological diagnosis, medical judgment, or treatment recommendation.
 - The analysis reflects a possible interpretation based on your input, not a definitive conclusion about your psychological state.
 - A person's character and psychology are complex; a single event or a limited set of memories can't fully define who someone is.
