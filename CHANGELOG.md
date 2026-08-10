@@ -14,6 +14,9 @@ This is a single-file project without strict semantic versioning; entries are re
 ### Fixed
 - Fixed the analysis card sometimes showing blank even though the memory, its surface words, and deep constructs were all merged and saved correctly. Cause: the bilingual reply schema added earlier was nested (`reply: {zh, en}`), and not every model followed that nested shape reliably — when it didn't, both fields silently resolved to empty strings. Changed the schema to two flat top-level fields (`replyZh` / `replyEn`, no nesting), and added a fallback that also accepts a plain legacy `reply` string or the old nested shape, so a non-conforming response still shows something instead of a blank card. Display now also falls back to whichever language field a model did fill in, if the other one is empty.
 
+### Docs
+- Added a short personal note near the end of the README (both languages), before the closing tagline.
+
 ### Changed
 - Default UI language changed from Chinese to English: the app now opens in English on first load, and `<html lang>` / the page title follow suit. You can still switch back to Chinese via the button in the top-right corner; existing data is unaffected.
 - Added project documentation: `LICENSE` (MIT), `PRIVACY.md` (privacy notes), `CHANGELOG.md` (this file), and `config.example.js` (an API config reference — not loaded automatically).

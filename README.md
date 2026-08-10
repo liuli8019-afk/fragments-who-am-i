@@ -254,4 +254,8 @@ AI is just here to help you look at it again.
 
 ---
 
+Like a lot of people with zero coding background, I rely on AI to put my ideas into words. I spent more than a decade of my life feeling lost — those years slipped away like water, and looking back now, they feel like a blank page. This is my first coding project. I sincerely welcome any honest feedback, and I hope it — or at least the idea behind it — can bring a little help to someone.
+
+---
+
 *Fragments — Who Am I? — using AI to analyze fragments of a life and explore the structure that shaped it.*
