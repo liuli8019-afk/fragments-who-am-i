@@ -4,6 +4,11 @@
 
 This is a single-file project without strict semantic versioning; entries are recorded by date. Roughly follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
+## 2026-08-15
+
+### Fixed
+- Fixed a crash that made every submission fail with "the analysis didn't finish" once a memory's AI-suggested domain matched one you'd already accumulated: the domains merge added last round assumed every existing `D.domains` entry had a `sources` array, but entries created before that change didn't, so `hit.sources.push(...)` threw partway through `mergeProfile`. Because the new entry had already been pushed to `D.entries` before the crash, and `save()` was never reached, the memory would show up in the list for that session but silently vanish on reload — leaving you permanently stuck at whatever count you'd last successfully saved. Fixed by guarding the merge (`hit.sources = hit.sources || []`) and adding a one-time migration that backfills a `sources` array onto any pre-existing domain entries missing one.
+
 ## 2026-08-09
 
 ### Added

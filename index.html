@@ -542,6 +542,18 @@ function migrateLangFields(){
   save();
 }
 
+/* domains 的 sources 数组是后加的字段。老数据里的 D.domains 条目没有这个数组,
+   合并到已有方向时会直接 push 到 undefined 上而报错——这个错误会被 submit() 的
+   catch 吃掉,表现成"分析没有完成",但那条记忆其实已经 push 进 D.entries 了,
+   只是没走到 save() 就崩了,刷新就消失,永远卡在崩溃前的最后一次存档。
+   这里一次性把缺的 sources 补成空数组,防止再次触发。 */
+function migrateDomainSources(){
+  if(D.domainsFixedAt) return;
+  D.domains.forEach(d => { if(!d.sources) d.sources = []; });
+  D.domainsFixedAt = Date.now();
+  save();
+}
+
 /* ------------------------- 合并逻辑 ------------------------- */
 function scoreOf(sum, weight){
   const avg = (sum || 50) / weight;
@@ -586,7 +598,7 @@ function mergeProfile(entryId, r){
     if(!DOMAINS[name]) return;              // 只接受词表内的项
     const st = Math.max(0, Math.min(100, Number(s.strength) || 50));
     const hit = D.domains.find(d => d.name === name);
-    if(hit){ hit.weight += 1; hit.strengthSum = (hit.strengthSum || 50) + st; hit.sources.push({entryId, strength:st}); }
+    if(hit){ hit.weight += 1; hit.strengthSum = (hit.strengthSum || 50) + st; (hit.sources = hit.sources || []).push({entryId, strength:st}); }
     else { D.domains.push({name, weight:1, strengthSum:st, sources:[{entryId, strength:st}]}); }
   });
   D.domains.forEach(d => d.score = scoreOf(d.strengthSum, d.weight));
@@ -1134,6 +1146,7 @@ style.textContent = '@keyframes sp{to{transform:rotate(360deg)}}';
 document.head.appendChild(style);
 
 migrateLangFields();
+migrateDomainSources();
 render();
 if(configured()) ensureTranslations();
 showIntroVeil();
