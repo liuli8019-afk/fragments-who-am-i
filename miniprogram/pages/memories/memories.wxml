@@ -1,0 +1,16 @@
+<view class="wrap {{dark ? 'dark deep-page' : ''}}">
+  <view wx:if="{{hasTrash}}" class="undobar">
+    <text>{{T.deleted}}</text>
+    <text class="act" bindtap="undo">{{T.undo}}</text>
+  </view>
+
+  <view class="mlist" wx:if="{{rows.length}}">
+    <view class="mrow" wx:for="{{rows}}" wx:key="id">
+      <view class="mrow-open" data-id="{{item.id}}" bindtap="openRow">
+        <text class="d">{{item.date}}</text><text class="tm">{{item.time}}</text>
+      </view>
+      <text class="mrow-del" data-id="{{item.id}}" catchtap="delRow">✕</text>
+    </view>
+  </view>
+  <view wx:else class="empty">{{T.empty}}</view>
+</view>

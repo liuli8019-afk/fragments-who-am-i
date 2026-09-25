@@ -1,0 +1,59 @@
+.replybox { margin-bottom: 32px; margin-top: 32px; }
+.reply { border-left: 4rpx solid var(--sage); padding: 8rpx 0 8rpx 32rpx; }
+.reply.crisis { border-left-color: var(--indigo); }
+.reply-text { font-family: "Songti SC", serif; font-size: 30rpx; line-height: 1.9; }
+.reply .note { margin-top: 24rpx; font-size: 24rpx; line-height: 1.7; color: var(--graphite); }
+.dark .reply .note { color: rgba(255,255,255,.6); }
+
+.card { margin-top: 24px; background: var(--mist); border-radius: 24rpx; padding: 32rpx; }
+.dark .card { background: rgba(255,255,255,.06); }
+.card .meta { font-size: 21rpx; letter-spacing: 2px; color: var(--dust); margin-bottom: 24rpx; }
+.card .lab { display: flex; align-items: center; gap: 12rpx; font-size: 21rpx; letter-spacing: 2px; color: var(--graphite); margin-bottom: 16rpx; }
+.dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: var(--sage); }
+.dot.deep { background: var(--indigo); }
+.chips { display: flex; flex-wrap: wrap; gap: 8rpx 24rpx; }
+.chips .chip { font-family: "Songti SC", serif; }
+.chips.s .chip { font-size: 30rpx; }
+.chips.d .chip { font-size: 26rpx; }
+.divline { border-top: 1px solid var(--line); margin-top: 32rpx; padding-top: 32rpx; }
+.card .foot { margin-top: 32rpx; font-size: 21rpx; color: var(--dust); }
+
+.inputbox { border: 1px solid var(--line); border-radius: 32rpx; background: var(--mist); padding: 24rpx 24rpx 16rpx; }
+.dark .inputbox { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.15); }
+.inp { width: 100%; font-family: "Songti SC", serif; font-size: 30rpx; line-height: 1.8; min-height: 140rpx; }
+.inputfoot { display: flex; justify-content: flex-end; margin-top: 8rpx; }
+.sendbtn {
+  width: 72rpx; height: 72rpx; border-radius: 50%; background: var(--ink); color: var(--paper);
+  display: flex; align-items: center; justify-content: center; font-size: 32rpx;
+}
+.dark .sendbtn { background: var(--paper); color: var(--ink); }
+.sendbtn.busy { opacity: .5; }
+.err { margin-top: 16rpx; font-size: 24rpx; color: var(--coral); }
+
+.gates { display: flex; gap: 20rpx; margin-top: 48rpx; }
+.gate {
+  flex: 1; border: 1px solid var(--line); border-radius: 24rpx; padding: 40rpx 20rpx; text-align: center;
+  font-family: "Songti SC", serif; font-size: 32rpx; letter-spacing: 1px;
+}
+.gate.dark { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+.tail { margin-top: 56rpx; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12rpx; }
+.tail .count { font-size: 22rpx; color: var(--dust); text-decoration: underline; }
+.tail .count.plain { text-decoration: none; }
+.tail .clear { font-size: 22rpx; color: var(--dust); }
+.confirmwipe { font-size: 22rpx; color: var(--graphite); }
+.dark .confirmwipe { color: rgba(255,255,255,.6); }
+.confirmwipe .wipeyes { color: var(--coral); text-decoration: underline; margin-left: 12rpx; }
+.confirmwipe .wipeno { text-decoration: underline; margin-left: 20rpx; }
+
+.veil {
+  position: fixed; inset: 0; background: rgba(23,22,26,.6); display: flex;
+  align-items: center; justify-content: center; z-index: 100; padding: 40rpx;
+}
+.veil .box {
+  max-width: 600rpx; width: 100%; max-height: 80vh; overflow-y: auto; background: var(--paper);
+  border-radius: 32rpx; padding: 48rpx 40rpx; box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+.veil .h2 { font-family: "Songti SC", serif; font-size: 34rpx; margin-bottom: 24rpx; display: block; }
+.veil .p { font-size: 24rpx; line-height: 1.8; color: var(--graphite); margin-bottom: 20rpx; display: block; }
+.veilbtn { width: 100%; margin-top: 12rpx; background: var(--ink); color: var(--paper); border-radius: 16rpx; padding: 20rpx; font-size: 26rpx; }

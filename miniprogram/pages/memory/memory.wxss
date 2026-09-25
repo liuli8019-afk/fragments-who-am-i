@@ -1,0 +1,9 @@
+.stamp { font-size: 21rpx; letter-spacing: 2px; color: var(--dust); margin-bottom: 32rpx; }
+.dtext { font-family: "Songti SC", serif; font-size: 29rpx; line-height: 2; display: block; }
+.meta { margin-top: 24rpx; font-size: 22rpx; color: var(--graphite); }
+.sec { margin-top: 40rpx; padding-top: 28rpx; border-top: 1px solid var(--line); }
+.sec .lab { font-size: 19rpx; letter-spacing: 2px; color: var(--dust); margin-bottom: 16rpx; }
+.chips { display: flex; flex-wrap: wrap; gap: 8rpx 24rpx; }
+.chips .chip { font-family: "Songti SC", serif; }
+.chips.s .chip { font-size: 29rpx; }
+.chips.d .chip { font-size: 25rpx; }

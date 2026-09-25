@@ -1,0 +1,17 @@
+{
+  "description": "Fragments miniprogram config file. appid is a DevTools test placeholder — replace it with your own registered Mini Program appid from mp.weixin.qq.com before publishing.",
+  "packOptions": { "ignore": [] },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.0.0",
+  "appid": "touristappid",
+  "projectname": "fragments-who-am-i",
+  "miniprogramRoot": "./"
+}

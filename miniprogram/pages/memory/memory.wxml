@@ -1,0 +1,21 @@
+<view class="wrap">
+  <view wx:if="{{!found}}" class="empty">{{T.empty}}</view>
+  <view wx:else class="detail">
+    <view class="stamp">{{stamp}}</view>
+    <view class="dtext">{{text}}</view>
+    <view wx:if="{{meta}}" class="meta">{{meta}}</view>
+
+    <view wx:if="{{analysis}}" class="sec">
+      <view class="lab">{{T.analysisLabel}}</view>
+      <view class="dtext">{{analysis}}</view>
+    </view>
+    <view wx:if="{{sw.length}}" class="sec">
+      <view class="lab">{{T.surfaceLabel}}</view>
+      <view class="chips s"><text wx:for="{{sw}}" wx:key="*this" class="chip">{{item}}</text></view>
+    </view>
+    <view wx:if="{{dw.length}}" class="sec">
+      <view class="lab">{{T.deepLabel}}</view>
+      <view class="chips d"><text wx:for="{{dw}}" wx:key="*this" class="chip">{{item}}</text></view>
+    </view>
+  </view>
+</view>

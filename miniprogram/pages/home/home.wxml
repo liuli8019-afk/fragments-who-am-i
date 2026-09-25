@@ -1,0 +1,77 @@
+<view class="wrap {{dark ? 'dark' : ''}}">
+  <view class="topbar">
+    <text class="lang" bindtap="toggleLang">{{T.other}}</text>
+  </view>
+
+  <view wx:if="{{previewMode}}" class="previewbar">
+    <text>{{T.previewLabel}}</text>
+    <text class="act" bindtap="exitDemo">{{T.previewExit}}</text>
+  </view>
+
+  <text class="ttl" bindtouchstart="titleTouchStart" bindtouchend="titleTouchEnd" bindtouchcancel="titleTouchEnd">{{T.title}}</text>
+  <view class="sub">{{T.subtitle}}</view>
+  <view wx:if="{{showDemoLink}}">
+    <text class="demolink" bindtap="enterDemo">{{T.seeDemo}}</text>
+  </view>
+
+  <view wx:if="{{reply}}" class="replybox">
+    <view class="reply {{reply.crisis ? 'crisis' : ''}}">
+      <text class="reply-text">{{reply.text}}</text>
+      <view wx:if="{{reply.crisis}}" class="note">{{T.crisis}}</view>
+    </view>
+    <view wx:if="{{reply.surfaceChips.length || reply.deepChips.length}}" class="card">
+      <view wx:if="{{reply.ev}}" class="meta">{{reply.ev}}</view>
+      <view wx:if="{{reply.surfaceChips.length}}">
+        <view class="lab"><view class="dot"></view><text>{{T.surfaceLabel}}</text></view>
+        <view class="chips s">
+          <text wx:for="{{reply.surfaceChips}}" wx:key="*this" class="chip">{{item}}</text>
+        </view>
+      </view>
+      <view wx:if="{{reply.deepChips.length}}" class="{{reply.surfaceChips.length ? 'divline' : ''}}">
+        <view class="lab"><view class="dot deep"></view><text>{{T.deepLabel}}</text></view>
+        <view class="chips d">
+          <text wx:for="{{reply.deepChips}}" wx:key="*this" class="chip">{{item}}</text>
+        </view>
+      </view>
+      <view class="foot">{{T.merged}}</view>
+    </view>
+  </view>
+  <view wx:else style="height:32rpx"></view>
+
+  <view class="inputbox">
+    <textarea class="inp" value="{{text}}" placeholder="{{T.placeholder}}" bindinput="onInput"
+      maxlength="-1" auto-height show-confirm-bar="{{false}}"></textarea>
+    <view class="inputfoot">
+      <button class="sendbtn {{busy ? 'busy' : ''}}" bindtap="submit" disabled="{{busy}}">
+        <text wx:if="{{!busy}}">↑</text><text wx:else>…</text>
+      </button>
+    </view>
+  </view>
+  <view wx:if="{{err}}" class="err">{{err}}</view>
+
+  <view class="gates">
+    <view class="gate" bindtap="goSurface">{{T.me1}}</view>
+    <view class="gate dark" bindtap="goDeep">{{T.me2}}</view>
+  </view>
+
+  <view class="tail">
+    <text wx:if="{{entryCount === 0}}" class="count plain">{{T.countZero}}</text>
+    <text wx:else class="count" bindtap="goMemories">{{countText}}</text>
+    <block wx:if="{{entryCount > 0}}">
+      <view wx:if="{{confirmReset}}" class="confirmwipe">
+        <text>{{T.clearWarn}}</text>
+        <text class="wipeyes" bindtap="doWipe">{{T.clearYes}}</text>
+        <text class="wipeno" bindtap="cancelWipe">{{T.clearNo}}</text>
+      </view>
+      <text wx:else class="clear" bindtap="askWipe">{{T.clear}}</text>
+    </block>
+  </view>
+
+  <view wx:if="{{showIntro}}" class="veil">
+    <view class="box">
+      <view class="h2">{{T.introTitle}}</view>
+      <view wx:for="{{T.introBody}}" wx:key="*this" class="p">{{item}}</view>
+      <button class="veilbtn" bindtap="dismissIntro">{{T.introOk}}</button>
+    </view>
+  </view>
+</view>

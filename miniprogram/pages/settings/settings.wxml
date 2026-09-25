@@ -1,0 +1,59 @@
+<view class="wrap">
+  <view class="sechead">{{T.setConn}}</view>
+  <view class="tipline">{{T.setIntro}}</view>
+
+  <view class="field">
+    <text class="flabel">{{T.setProvider}}</text>
+    <picker mode="selector" range="{{providerNames}}" value="{{providerIdx}}" bindchange="onProviderChange">
+      <view class="pickerbox">{{providerNames[providerIdx]}}</view>
+    </picker>
+  </view>
+  <view class="field">
+    <text class="flabel">{{T.setProto}}</text>
+    <picker mode="selector" range="{{protoNames}}" value="{{protoIdx}}" bindchange="onProtoChange">
+      <view class="pickerbox">{{protoNames[protoIdx]}}</view>
+    </picker>
+  </view>
+
+  <view class="tipline warn">{{domainNote}}</view>
+
+  <view class="field">
+    <text class="flabel">{{T.setBase}}</text>
+    <input class="input" value="{{baseUrl}}" bindinput="onBaseUrl" placeholder="https://your-endpoint/v1" />
+  </view>
+  <view class="field">
+    <text class="flabel">{{T.setModel}}</text>
+    <input class="input" value="{{model}}" bindinput="onModel" />
+  </view>
+  <view class="field">
+    <text class="flabel">{{T.setTemp}}</text>
+    <input class="input" type="digit" value="{{temperature}}" bindinput="onTemp" />
+  </view>
+  <view class="field">
+    <text class="flabel">{{T.setProxy}}</text>
+    <input class="input" value="{{proxy}}" bindinput="onProxy" placeholder="{{T.proxyPh}}" />
+  </view>
+  <view class="field">
+    <text class="flabel">{{keyLabel}}</text>
+    <input class="input" password value="{{apiKey}}" bindinput="onKey" />
+  </view>
+
+  <view class="row">
+    <view class="btn primary" bindtap="save">{{T.setSave}}</view>
+    <view class="btn" bindtap="test">{{T.setTest}}</view>
+  </view>
+  <view wx:if="{{testOut}}" class="testout {{testWarn ? 'warn' : ''}}">{{testOut}}</view>
+
+  <view class="sechead">{{T.setData}}</view>
+  <view class="statline">{{statText}}</view>
+  <view class="row" style="margin-top:20rpx">
+    <view class="btn" bindtap="copyExport">{{T.setExport}}</view>
+    <view class="btn" bindtap="pasteImport">{{T.setImport}}</view>
+    <view class="btn danger" bindtap="wipeAll">{{T.setWipe}}</view>
+  </view>
+
+  <view class="sechead">{{T.setRules}}</view>
+  <view class="rules">
+    <view class="ruleitem" wx:for="{{T.rules}}" wx:key="*this">· {{item}}</view>
+  </view>
+</view>

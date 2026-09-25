@@ -1,0 +1,19 @@
+.deep-page.dark { background: var(--ink); color: var(--paper); min-height: 100vh; }
+
+.undobar {
+  display: flex; align-items: center; justify-content: space-between; padding: 20rpx 0;
+  margin-bottom: 12rpx; font-size: 24rpx; color: var(--graphite); border-bottom: 1px solid var(--line);
+}
+.dark .undobar { color: rgba(255,255,255,.6); border-bottom-color: rgba(255,255,255,.15); }
+.undobar .act { color: var(--ink); text-decoration: underline; }
+.dark .undobar .act { color: var(--paper); }
+
+.mlist { display: flex; flex-direction: column; }
+.mrow { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
+.dark .mrow { border-bottom-color: rgba(255,255,255,.15); }
+.mrow-open { flex: 1; padding: 24rpx 0; }
+.mrow-open .d { font-size: 24rpx; color: var(--ink); }
+.dark .mrow-open .d { color: var(--paper); }
+.mrow-open .tm { margin-left: 20rpx; font-size: 22rpx; color: var(--dust); }
+.mrow-del { padding: 16rpx; color: var(--dust); font-size: 24rpx; }
+.dark .mrow-del { color: rgba(255,255,255,.4); }

@@ -1,0 +1,21 @@
+<view class="wrap dark deep-page">
+  <view wx:if="{{previewMode}}" class="previewbar">
+    <text>{{T.previewLabel}}</text>
+    <text class="act" bindtap="exitDemo">{{T.previewExit}}</text>
+  </view>
+
+  <view wx:if="{{hasItems}}">
+    <view class="cloud" bindtouchstart="cloudTouchStart" bindtouchend="cloudTouchEnd" bindtouchcancel="cloudTouchEnd">
+      <text wx:for="{{items}}" wx:key="key" class="cw" data-idx="{{index}}" catchtap="wordTap"
+        style="font-size:{{item.fontSize}};opacity:{{item.opacity}}">{{item.label}}</text>
+    </view>
+    <view wx:if="{{unlocked && revealed}}" class="reveal">
+      <view class="lab">{{T.notDiagnosis}}</view>
+      <view class="revealrow">
+        <text wx:for="{{doms}}" wx:key="name" style="color:{{item.color}}" class="domitem">{{item.name}}</text>
+      </view>
+    </view>
+    <view class="deepfoot">{{T.deepFooter}}</view>
+  </view>
+  <view wx:else class="empty">{{T.empty}}</view>
+</view>

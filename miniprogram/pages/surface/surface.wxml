@@ -1,0 +1,12 @@
+<view class="wrap">
+  <view wx:if="{{previewMode}}" class="previewbar">
+    <text>{{T.previewLabel}}</text>
+    <text class="act" bindtap="exitDemo">{{T.previewExit}}</text>
+  </view>
+
+  <view class="cloud" wx:if="{{hasItems}}">
+    <text wx:for="{{items}}" wx:key="key" class="cw" data-idx="{{index}}" bindtap="wordTap"
+      style="font-size:{{item.fontSize}};opacity:{{item.opacity}}">{{item.label}}</text>
+  </view>
+  <view wx:else class="empty">{{T.empty}}</view>
+</view>
