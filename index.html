@@ -153,6 +153,31 @@ body.dark .detail .sec{border-top-color:rgba(255,255,255,.12)}
 .deepfoot{margin-top:24px;font-size:11px;line-height:1.7;color:var(--dust);text-align:center;max-width:420px;
   margin-left:auto;margin-right:auto}
 body.dark .deepfoot{color:rgba(255,255,255,.4)}
+
+.demolink{display:inline-block;margin-top:14px;background:none;border:0;padding:0;cursor:pointer;
+  font-family:var(--sans);font-size:12px;color:var(--sage);text-decoration:underline;text-underline-offset:3px}
+.previewbar{display:flex;align-items:center;justify-content:space-between;background:var(--mist);
+  border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:12px;font-family:var(--sans);color:var(--graphite)}
+body.dark .previewbar{background:rgba(255,255,255,.08);color:rgba(255,255,255,.65)}
+.previewbar button{background:none;border:0;color:var(--ink);text-decoration:underline;text-underline-offset:3px;
+  cursor:pointer;font-family:var(--sans);font-size:12px;padding:0}
+body.dark .previewbar button{color:var(--paper)}
+
+.cloudhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.cloudhead .back{margin-bottom:0}
+.sharebtn{background:none;border:1px solid var(--line);border-radius:50%;width:36px;height:36px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:var(--graphite);cursor:pointer;transition:opacity .2s}
+.sharebtn:hover{opacity:.7}
+body.dark .sharebtn{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.7)}
+
+.sharebox{max-width:440px;width:100%;background:var(--paper);border-radius:16px;padding:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.28);max-height:90vh;overflow-y:auto}
+.sharebox img{width:100%;border-radius:10px;display:block;margin-bottom:14px;background:var(--mist)}
+.sharebox .row .btn{flex:1;text-align:center}
+
+@keyframes cwIn{from{opacity:0;transform:translateY(6px) scale(.94)}to{opacity:var(--o);transform:none}}
+.cloud span.cw{animation:cwIn .55s cubic-bezier(.16,.84,.44,1) both}
+@media (prefers-reduced-motion: reduce){ .cloud span.cw{animation:none} }
 </style>
 </head>
 <body>
@@ -217,6 +242,7 @@ const frame = () => stack[stack.length - 1];   // 不要叫 top:window.top 是�
 function push(frame){ stack = stack.concat([Object.assign({view:'home', filter:null, id:null, dark:false}, frame)]); revealed = false; err = ''; trash = null; render(); }
 function pop(){ if(stack.length > 1) stack = stack.slice(0, -1); revealed = false; trash = null; render(); }
 let busy = false, reply = null, err = '', listening = false, confirmReset = false, revealed = false, trash = null;
+let previewMode = false, previewBackup = null;
 let rec = null;
 
 function load(){
@@ -250,7 +276,7 @@ function migrate(){
     return s;
   }catch(e){ return null; }
 }
-function save(){ try{ localStorage.setItem(STORE, JSON.stringify(D)); }catch(e){ err = t().errSave; } }
+function save(){ if(previewMode) return; try{ localStorage.setItem(STORE, JSON.stringify(D)); }catch(e){ err = t().errSave; } }
 
 /* --------------------------- 文案 --------------------------- */
 const T = {
@@ -276,6 +302,11 @@ const T = {
     ],
     introOk:'我知道了,继续',
     deepFooter:'以上是基于你写下的内容做的可能的模式描述,不是诊断。数据只留在这台设备上。如果最近很难受,建议找信任的人聊聊或者寻求专业的帮助。',
+    seeDemo:'想先看看效果？查看示例 →',
+    previewLabel:'示例数据', previewExit:'退出预览',
+    previewLocked:'这是示例数据,退出预览后才能操作真实记录。',
+    share:'分享', shareDownload:'保存图片', shareNative:'分享', close:'关闭',
+    shareTagline:'一个整理个人叙述的小工具 · 不是诊断',
     locale:'zh-CN', speech:'zh-CN', other:'EN',
     setConn:'AI 接口', setProvider:'服务商', setProto:'接口协议',
     setBase:'接口地址(Base URL,不用带 /chat/completions)', setModel:'模型',
@@ -319,6 +350,11 @@ const T = {
     ],
     introOk:'I understand, continue',
     deepFooter:"The above is a possible pattern description based on what you wrote, not a diagnosis. Data stays on this device only. If things have been hard lately, please talk to someone you trust or seek professional support.",
+    seeDemo:'Curious what this looks like? See an example →',
+    previewLabel:'Example data', previewExit:'Exit preview',
+    previewLocked:"This is example data — exit preview to work with your real records.",
+    share:'Share', shareDownload:'Save image', shareNative:'Share', close:'Close',
+    shareTagline:'A tool for organizing personal narratives · not a diagnosis',
     locale:'en-US', speech:'en-US', other:'中',
     setConn:'AI connection', setProvider:'Provider', setProto:'Protocol',
     setBase:'Base URL (no /chat/completions)', setModel:'Model',
@@ -561,6 +597,99 @@ function scoreOf(sum, weight){
 }
 const uniqIds = src => Array.from(new Set((src || []).map(x => x.entryId)));
 
+/* ------------------------- 示例数据 / 预览模式 -------------------------
+   首次打开、还没写过任何记忆的人,很难凭空想象词云长什么样。"查看示例"临时把
+   D 换成一份手写的、结构和真实合并结果完全一致的假数据(用同一个 scoreOf 算分),
+   不经过 save()——previewMode 打开时 save() 直接短路,真实数据不会被碰到。
+   退出预览就是把备份换回来,不做任何"反向合并"的运算。 */
+function buildSampleD(){
+  const now = Date.now(), day = 86400000;
+  const mk = (id, text, replyZh, replyEn, daysAgo) =>
+    ({id, text, at: now - daysAgo * day, event: null, safety: 'none', replyZh, replyEn});
+
+  const entries = [
+    mk('d1', '转学第一天,谁都不认识,自己在操场边坐了一整节课间。',
+      '那天你没有硬挤进任何一群人,而是先坐下来看清楚状况——这不是怯懦,是你应对陌生环境的方式:先观察,再决定要不要靠近。这个习惯后来一直都在。',
+      "You didn't force your way into a group that day — you sat down and watched first. That's not timidity, it's how you handle unfamiliar situations: observe before deciding whether to get closer. The habit stuck.", 210),
+    mk('d2', '答应帮同事带饭,那天自己其实特别忙,还是绕路去买了。',
+      '明明自己那天顾不过来,你还是把答应过的事情做到了。这种说到做到,不是理所应当,是你一直在主动扛的东西。',
+      "You were clearly stretched thin that day, and you still followed through on what you'd promised. Keeping your word like that isn't a given — it's something you actively carry.", 178),
+    mk('d3', '在会议上被当众指出错误,当场脸红了,但还是把剩下的汇报讲完了。',
+      '脸红说明那一下真的扎到你了,但你没有找借口提前结束——把剩下的讲完,这需要比看上去更多的定力。',
+      "Blushing means it actually stung. But you didn't cut the presentation short to escape it — finishing it took more composure than it looked like from outside.", 151),
+    mk('d4', '工作上卡住的时候,会先自己查很久资料,不太习惯第一时间开口求助。',
+      "你把'自己先试'当成默认选项,这让你解决问题的能力很扎实,但也可能让你在真正需要帮忙的时候,拖了太久才开口。",
+      "Your default is to try it yourself first. That's built you real problem-solving muscle — but it may also mean you wait too long to ask when you genuinely need help.", 122),
+    mk('d5', '朋友出事的时候,会比自己遇到事更上心,熬夜帮忙想办法。',
+      '别人的事你会更用力地去扛,这是你在乎人的方式。但也可以问问自己:轮到你需要人扛一下的时候,你会不会也这样对自己?',
+      "You show up harder for other people's problems than your own — that's how you love people. Worth asking, though: when it's your turn to need carrying, do you extend yourself the same effort?", 96),
+    mk('d6', '很少主动说自己过得好不好,更习惯先问别人。',
+      '把话题先转向别人,是一种很熟练的自我保护——不用先暴露自己。但这也意味着,想真正了解你的人,得自己先问出口才行。',
+      "Turning the conversation toward someone else first is a well-practiced kind of self-protection — you don't have to expose yourself first. It also means anyone who wants to know you has to be the one to ask.", 61),
+    mk('d7', '计划被临时打乱的时候,表面很冷静,其实心里已经在重新排列所有步骤。',
+      '外面看起来毫无波澜,脑子里其实已经在飞速重新规划——这种冷静不是没感觉,是你处理不确定性的方式已经练得很快了。',
+      "It looks unruffled from the outside, but your mind is already re-sequencing everything. That calm isn't the absence of a reaction — it's how fast you've learned to process uncertainty.", 30),
+    mk('d8', '犯错之后,会反复回想很久,比别人指出来的还严厉。',
+      '别人可能早就翻篇了,你自己还在反复审判自己。这种自我要求让你很少懈怠,但代价是你对自己,常常比对别人更狠。',
+      "Other people may have already moved on, but you're still re-trying the case against yourself. That standard keeps you from coasting — at the cost of being harder on yourself than you'd ever be on someone else.", 6)
+  ];
+
+  const surface = [
+    {keyword:'谨慎', en:'cautious', in:['d1','d4','d7']},
+    {keyword:'独立', en:'self-reliant', in:['d1','d4']},
+    {keyword:'内敛', en:'reserved', in:['d1','d6']},
+    {keyword:'守信', en:'reliable', in:['d2']},
+    {keyword:'责任心强', en:'dependable', in:['d2','d5']},
+    {keyword:'敏感', en:'sensitive', in:['d3']},
+    {keyword:'冷静', en:'composed', in:['d3','d7']},
+    {keyword:'体贴', en:'considerate', in:['d5']},
+    {keyword:'隐忍', en:'self-restrained', in:['d6','d8']},
+    {keyword:'自我苛责', en:'self-critical', in:['d8']}
+  ].map(w => ({keyword:w.keyword, en:w.en, weight:w.in.length, sources:w.in.map(id => ({entryId:id, evidence:''}))}))
+   .sort((a,b) => b.weight - a.weight);
+
+  const deep = [
+    {term:'Emotional Suppression', zh:'情绪抑制', in:[['d3',70],['d6',65],['d8',68]]},
+    {term:'Avoidant Coping', zh:'回避型应对', in:[['d1',65],['d4',60]]},
+    {term:'Conditional Self-Worth', zh:'条件性自我价值', in:[['d2',55],['d5',60]]},
+    {term:'Hypervigilance', zh:'高度警觉', in:[['d7',60]]}
+  ].map(d => {
+    const weight = d.in.length, strengthSum = d.in.reduce((s,[,v]) => s + v, 0);
+    return {term:d.term, zh:d.zh, weight, strengthSum, score:scoreOf(strengthSum, weight),
+      sources:d.in.map(([id,v]) => ({entryId:id, evidence:'', strength:v}))};
+  }).sort((a,b) => (b.score||0) - (a.score||0));
+
+  const domains = [
+    {name:'情绪调节困难方向', in:[['d6',55],['d7',50]]},
+    {name:'羞耻与自我否定方向', in:[['d3',50],['d8',55]]}
+  ].map(d => {
+    const weight = d.in.length, strengthSum = d.in.reduce((s,[,v]) => s + v, 0);
+    return {name:d.name, weight, strengthSum, score:scoreOf(strengthSum, weight),
+      sources:d.in.map(([id,v]) => ({entryId:id, strength:v}))};
+  }).sort((a,b) => (b.score||0) - (a.score||0));
+
+  const base = JSON.parse(JSON.stringify(DEFAULTS));
+  base.entries = entries; base.surface = surface; base.deep = deep; base.domains = domains;
+  base.lang = D.lang; base.seenIntro = true; base.langFixedAt = Date.now(); base.domainsFixedAt = Date.now();
+  return base;
+}
+
+function enterDemo(){
+  previewBackup = D;
+  D = buildSampleD();
+  previewMode = true;
+  revealed = false; reply = null; err = ''; confirmReset = false;
+  stack = [{view:'home', filter:null, id:null, dark:false}, {view:'surface', filter:null, id:null, dark:false}];
+  render();
+}
+function exitDemo(){
+  if(!previewMode) return;
+  D = previewBackup; previewBackup = null; previewMode = false;
+  revealed = false; reply = null; err = ''; confirmReset = false;
+  stack = [{view:'home', filter:null, id:null, dark:false}];
+  render();
+}
+
 function mergeProfile(entryId, r){
   (r.surface || []).forEach(s => {
     if(!s || !s.keyword) return;
@@ -679,6 +808,7 @@ async function submit(){
   const el = document.getElementById('inp');
   const v = (el ? el.value : '').trim();
   if(!v || busy) return;
+  if(previewMode){ err = t().previewLocked; render(); return; }
   if(!configured()){ err = t().noConfig; render(); return; }
   busy = true; err = ''; reply = null; stopMic(); render();
   try{
@@ -728,7 +858,8 @@ const ICON = {
   up:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>',
   spin:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation:sp 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>',
   left:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
-  trash:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>'
+  trash:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+  share:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>'
 };
 
 function render(){
@@ -736,8 +867,12 @@ function render(){
   const dark = view === 'deep' || f.dark;
   document.body.classList.toggle('dark', dark);
   const app = document.getElementById('app');
+  const previewbar = previewMode
+    ? `<div class="previewbar"><span>${esc(t().previewLabel)}</span><button type="button" data-act="exitdemo">${esc(t().previewExit)}</button></div>`
+    : '';
   app.innerHTML =
     `<div class="topbar"><button class="lang" data-act="lang">${esc(t().other)}</button></div>` +
+    previewbar +
     ({home:vHome, surface:vSurface, deep:vDeep, memories:vMemories, memory:vMemory, settings:vSettings}[view] || vHome)(dark);
   bind();
   document.getElementById('tip').style.display = 'none';
@@ -770,6 +905,9 @@ function showIntroVeil(){
 function vHome(){
   const n = D.entries.length, T_ = t();
   let h = `<h1 id="ttl">${esc(T_.title)}</h1><p class="sub">${esc(T_.subtitle)}</p>`;
+  if(n === 0 && !previewMode){
+    h += `<button type="button" class="demolink" data-act="demo">${esc(T_.seeDemo)}</button>`;
+  }
 
   if(reply){
     // 分析文字和浅层/深层词都从 entry / D.surface / D.deep 实时取,而不是提交那一刻冻结的快照——
@@ -824,12 +962,16 @@ function vHome(){
 /* ------- 词云 ------- */
 function cloud(items){
   const max = Math.max(1, ...items.map(i => i.weight));
-  return `<div class="cloud" id="cloud">${items.map(it => {
+  return `<div class="cloud" id="cloud">${items.map((it, i) => {
     const r = it.weight / max;
-    return `<span data-k="${esc(it.key)}" data-n="${it.count}"
-      style="font-size:${16 + Math.round(r * 25)}px;--o:${(0.42 + r * 0.58).toFixed(2)}">${esc(it.label)}</span>`;
+    return `<span class="cw" data-k="${esc(it.key)}" data-n="${it.count}"
+      style="font-size:${16 + Math.round(r * 25)}px;--o:${(0.42 + r * 0.58).toFixed(2)};animation-delay:${Math.min(i * 28, 600)}ms">${esc(it.label)}</span>`;
   }).join('')}</div>`;
 }
+
+const cloudHead = (kind, hasItems) => `<div class="cloudhead">${backBtn()}${hasItems
+  ? `<button type="button" class="sharebtn" data-act="share" data-v="${kind}" title="${esc(t().share)}" aria-label="${esc(t().share)}">${ICON.share}</button>`
+  : ''}</div>`;
 
 function surfaceItems(){
   return D.surface.map(w => {
@@ -846,7 +988,7 @@ function deepItems(){
 
 function vSurface(){
   const items = surfaceItems();
-  return backBtn() + (items.length ? cloud(items) : `<p class="empty">${esc(t().empty)}</p>`);
+  return cloudHead('surface', !!items.length) + (items.length ? cloud(items) : `<p class="empty">${esc(t().empty)}</p>`);
 }
 
 /* ------- 我2:彩蛋 -------
@@ -856,17 +998,142 @@ const REVEAL_AFTER = 8, HOLD_MS = 1200;
 
 function vDeep(){
   const items = deepItems();
-  if(!items.length) return backBtn() + `<p class="empty">${esc(t().empty)}</p>`;
+  if(!items.length) return cloudHead('deep', false) + `<p class="empty">${esc(t().empty)}</p>`;
   const doms = D.domains.slice().sort((a, b) => (b.score || 0) - (a.score || 0));
   const unlocked = D.entries.length >= REVEAL_AFTER && doms.length > 0;
   const shade = (i, n) => {
     const p = n <= 1 ? 0 : i / (n - 1), from = [255,255,255], to = [104,110,124];
     return 'rgb(' + from.map((v, k) => Math.round(v + (to[k] - v) * p)).join(',') + ')';
   };
-  return backBtn() + cloud(items) + ((unlocked && revealed)
+  return cloudHead('deep', true) + cloud(items) + ((unlocked && revealed)
     ? `<div class="reveal"><div class="lab">${esc(t().notDiagnosis)}</div><div class="row">${
         doms.map((d, i) => `<span style="color:${shade(i, doms.length)}">${esc(D.lang === 'en' ? (DOMAINS[d.name] || d.name) : d.name)}</span>`).join('')
       }</div></div>` : '') + `<p class="deepfoot">${esc(t().deepFooter)}</p>`;
+}
+
+/* ------- 分享卡片 -------
+   把当前词云画成一张可以保存 / 分享出去的图。是本地渲染的静态图,不经过网络,
+   不带任何你没主动点保存的数据。字体用系统里本来就有的字体栈,跟页面视觉统一。 */
+const SHARE_SANS = '"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif';
+const SHARE_SERIF = '"Songti SC","Noto Serif SC","Source Han Serif SC","Songti TC",Georgia,"Times New Roman",serif';
+
+function wrapWords(ctx, items, contentW, minFont, maxFont, family){
+  const max = Math.max(1, ...items.map(i => i.weight));
+  const gapX = 30, gapY = 26;
+  const words = items.map(it => {
+    const r = it.weight / max;
+    const size = Math.round(minFont + r * (maxFont - minFont));
+    ctx.font = `${size}px ${family}`;
+    return {label: it.label, size, w: ctx.measureText(it.label).width, alpha: 0.42 + r * 0.58};
+  });
+  const rows = []; let row = [], rowW = 0;
+  words.forEach(word => {
+    const addW = row.length ? gapX + word.w : word.w;
+    if(row.length && rowW + addW > contentW){ rows.push(row); row = []; rowW = 0; }
+    row.push(word); rowW += row.length > 1 ? gapX + word.w : word.w;
+  });
+  if(row.length) rows.push(row);
+  return {rows, gapX, gapY};
+}
+
+function drawWordRows(ctx, layout, family, cx, cy){
+  const rowHeights = layout.rows.map(row => Math.max(...row.map(w => w.size)));
+  const totalH = rowHeights.reduce((s, h) => s + h, 0) + layout.gapY * Math.max(0, layout.rows.length - 1);
+  let y = cy - totalH / 2;
+  ctx.textAlign = 'left';
+  layout.rows.forEach((row, ri) => {
+    const rowW = row.reduce((s, w, i) => s + w.w + (i ? layout.gapX : 0), 0);
+    let x = cx - rowW / 2;
+    const rh = rowHeights[ri];
+    row.forEach(word => {
+      ctx.font = `${word.size}px ${family}`;
+      ctx.globalAlpha = word.alpha;
+      ctx.fillText(word.label, x, y + rh * 0.82);
+      x += word.w + layout.gapX;
+    });
+    y += rh + layout.gapY;
+  });
+  ctx.globalAlpha = 1;
+}
+
+function renderShareCanvas(kind){
+  const T_ = t();
+  const items = kind === 'deep' ? deepItems() : surfaceItems();
+  const dark = kind === 'deep';
+  const W = 1080, H = 1350;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const bg = dark ? '#17161A' : '#FFFFFF';
+  const ink = dark ? '#FFFFFF' : '#17161A';
+  const muted = dark ? 'rgba(255,255,255,.55)' : '#6E6A66';
+  const faint = dark ? 'rgba(255,255,255,.32)' : '#B4AEA4';
+
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'center';
+
+  ctx.fillStyle = faint;
+  ctx.font = `600 22px ${SHARE_SANS}`;
+  ctx.fillText('FRAGMENTS · WHO AM I?', W / 2, 118);
+
+  ctx.fillStyle = muted;
+  ctx.font = `26px ${SHARE_SANS}`;
+  ctx.fillText(kind === 'deep' ? `${T_.me2} · ${T_.deepLabel}` : `${T_.me1} · ${T_.surfaceLabel}`, W / 2, 168);
+
+  ctx.fillStyle = ink;
+  const layout = wrapWords(ctx, items, W - 160, dark ? 30 : 34, dark ? 68 : 78, SHARE_SERIF);
+  drawWordRows(ctx, layout, SHARE_SERIF, W / 2, H / 2 + 20);
+
+  ctx.textAlign = 'center';
+  ctx.strokeStyle = dark ? 'rgba(255,255,255,.15)' : '#E9E5DE';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(140, H - 170); ctx.lineTo(W - 140, H - 170); ctx.stroke();
+
+  ctx.fillStyle = muted;
+  ctx.font = `20px ${SHARE_SANS}`;
+  ctx.fillText(T_.shareTagline, W / 2, H - 120);
+
+  ctx.fillStyle = faint;
+  ctx.font = `18px ${SHARE_SANS}`;
+  ctx.fillText('github.com/liuli8019-afk/fragments-who-am-i', W / 2, H - 82);
+
+  return canvas;
+}
+
+function openShareCard(kind){
+  const T_ = t();
+  const canvas = renderShareCanvas(kind);
+  const filename = `fragments-${kind}-${new Date().toISOString().slice(0, 10)}.png`;
+  const veil = document.createElement('div');
+  veil.className = 'veil';
+  veil.innerHTML = `<div class="sharebox">
+    <img src="${canvas.toDataURL('image/png')}" alt="">
+    <div class="row">
+      <button type="button" class="btn primary" data-act="dl">${esc(T_.shareDownload)}</button>
+      <button type="button" class="btn" data-act="closeShare">${esc(T_.close)}</button>
+    </div>
+  </div>`;
+  const dlBtn = veil.querySelector('[data-act="dl"]');
+  canvas.toBlob(blob => {
+    if(!blob) return;
+    let file = null;
+    try{ file = new File([blob], filename, {type: 'image/png'}); }catch(e){}
+    if(file && navigator.canShare && navigator.canShare({files: [file]})){
+      dlBtn.textContent = T_.shareNative;
+      dlBtn.onclick = () => { navigator.share({files: [file], title: 'Fragments — Who Am I?'}).catch(() => {}); };
+    } else {
+      dlBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      };
+    }
+  }, 'image/png');
+  veil.querySelector('[data-act="closeShare"]').onclick = () => veil.remove();
+  veil.onclick = e => { if(e.target === veil) veil.remove(); };
+  document.body.appendChild(veil);
 }
 
 /* ------- 记忆清单 / 详情 ------- */
@@ -998,6 +1265,12 @@ function bind(){
     if(!el) return;
     const act = el.dataset.act;
 
+    // 示例数据是一次性、不落盘的预览——接口配置和数据管理这些跟"真实存档"绑定的操作,
+    // 预览时直接拦掉,提示先退出预览。删除/撤销留着可以随便玩,反正不会存盘。
+    if(previewMode && ['askwipe','wipe','saveset','test','export','import','wipeall'].includes(act)){
+      err = t().previewLocked; render(); return;
+    }
+
     if(act === 'lang'){ D.lang = D.lang === 'zh' ? 'en' : 'zh'; save(); render(); ensureTranslations(); }
     else if(act === 'back'){ pop(); }
     else if(act === 'go'){ push({view:el.dataset.v, dark:el.dataset.v === 'deep'}); }
@@ -1007,6 +1280,9 @@ function bind(){
     else if(act === 'open'){ push({view:'memory', id:el.dataset.id, filter:frame().filter, dark:frame().dark}); }
     else if(act === 'del'){ deleteEntry(el.dataset.id); }
     else if(act === 'undo'){ undoDelete(); }
+    else if(act === 'demo'){ enterDemo(); }
+    else if(act === 'exitdemo'){ exitDemo(); }
+    else if(act === 'share'){ openShareCard(el.dataset.v); }
     else if(act === 'askwipe'){ confirmReset = true; render(); }
     else if(act === 'nowipe'){ confirmReset = false; render(); }
     else if(act === 'wipe'){
